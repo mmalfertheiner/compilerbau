@@ -1,47 +1,94 @@
 %{
 #include <stdio.h>
+#include <string.h>
 
 void yyerror(char *s)
 {
-      printf("%d: %s at %s\n", yylineno, s, yytext);
+    printf("Error at line %d: %s at %s\n", yylineno, s, yytext);
+}
+
+char *toUpperCase ( char *str )
+{
+
+	char *newstr, *p;
+	p = newstr = strdup(str);
+
+	while( *p )
+	{
+		*p=toupper( *p );
+		p++;
+	}
+
+	return newstr;
+}
+
+char *toLowerCase ( char *str )
+{
+
+	char *newstr, *p;
+	p = newstr = strdup(str);
+
+	while( *p )
+	{
+		*p=tolower( *p );
+		p++;
+	}
+
+	return newstr;
 }
 
 %}
 
 %option noyywrap
-whitespace		[ \t]+
+
+
+Comment					\{.*\}
+Blanks					[ ]+
+Tabs					[\t]+
+NewLines				[\n]+
+String					\".*\"
+Integer 				[0-9]+
+Identifier				[A-z][A-z0-9]*
 
 %%
 
-[-,;.()\[\]{}*/+<=>]	{ printf( "%s", yytext ); }
+{NewLines}				{ yylineno++; printf("\n"); }
+{Blanks}				{ printf(" "); }
+{Tabs}					{ printf( "%s", yytext); }
+[-,:;.(){}\[\]*/+<=>]	{ printf( "%s", yytext ); }
+{Comment}				{ printf( "%s", yytext ); }
+{String}				{ printf( "%s", yytext ); }
+{Integer}				{ printf( "%s", yytext ); }
 
-":=" 			{ printf( "%s", yytext ); }
-"<="			{ printf( "%s", yytext ); }
-"<>"			{ printf( "%s", yytext ); }	
-"and" 			{ printf( "%s", yytext ); }
-"array"			{ printf( "%s", yytext ); }
-"begin"			{ printf( "%s", yytext ); }
-"div"			{ printf( "%s", yytext ); }
-"do"			{ printf( "%s", yytext ); }
-"else"			{ printf( "%s", yytext ); }
-"end"			{ printf( "%s", yytext ); }
-"false"			{ printf( "%s", yytext ); }
-"for"			{ printf( "%s", yytext ); }
-"if"			{ printf( "%s", yytext ); }
-"integer"		{ printf( "%s", yytext ); }
-"mod"			{ printf( "%s", yytext ); }
-"of"			{ printf( "%s", yytext ); }
-"program"		{ printf( "%s", yytext ); }
-"read"			{ printf( "%s", yytext ); }
-"real"			{ printf( "%s", yytext ); }
-"then"			{ printf( "%s", yytext ); }
-"to"			{ printf( "%s", yytext ); }
-"true"			{ printf( "%s", yytext ); }
-"var"			{ printf( "%s", yytext ); }
-"while"			{ printf( "%s", "WHILE" ); }
-"write"			{ printf( "%s", yytext ); }
 
-.				{ yyerror(yytext); }
+":=" 					{ printf( "%s", yytext ); }
+"<="					{ printf( "%s", yytext ); }
+"<>"					{ printf( "%s", yytext ); }	
+"and" 					{ printf( "%s", toUpperCase(yytext)); }
+"array"					{ printf( "%s", toUpperCase(yytext)); }
+"begin"					{ printf( "%s", toUpperCase(yytext)); }
+"div"					{ printf( "%s", toUpperCase(yytext)); }
+"do"					{ printf( "%s", toUpperCase(yytext)); }
+"else"					{ printf( "%s", toUpperCase(yytext)); }
+"end"					{ printf( "%s", toUpperCase(yytext)); }
+"false"					{ printf( "%s", toUpperCase(yytext)); }
+"for"					{ printf( "%s", toUpperCase(yytext)); }
+"if"					{ printf( "%s", toUpperCase(yytext)); }
+"integer"				{ printf( "%s", toUpperCase(yytext)); }
+"mod"					{ printf( "%s", toUpperCase(yytext)); }
+"of"					{ printf( "%s", toUpperCase(yytext)); }
+"program"				{ printf( "%s", toUpperCase(yytext)); }
+"read"					{ printf( "%s", toUpperCase(yytext)); }
+"real"					{ printf( "%s", toUpperCase(yytext)); }
+"then"					{ printf( "%s", toUpperCase(yytext)); }
+"to"					{ printf( "%s", toUpperCase(yytext)); }
+"true"					{ printf( "%s", toUpperCase(yytext)); }
+"var"					{ printf( "%s", toUpperCase(yytext)); }
+"while"					{ printf( "%s", toUpperCase(yytext)); }
+"write"					{ printf( "%s", toUpperCase(yytext)); }
+{Identifier}			{ printf( "%s", toLowerCase(yytext)); }
+
+.						{ yyerror(yytext); }
 
 %%
 
