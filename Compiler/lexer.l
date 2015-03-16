@@ -37,6 +37,36 @@ char *toLowerCase ( char *str )
 	return newstr;
 }
 
+char *substring(char *str, int position, int length) 
+{
+   char *pointer;
+   int c;
+ 
+   pointer = malloc(length+1);
+ 
+   if (pointer == NULL)
+   {
+      printf("Unable to allocate memory.\n");
+      exit(1);
+   }
+ 
+   for (c = 0 ; c < length ; c++)
+   {
+      *(pointer+c) = *(str+position-1);      
+      str++;   
+   }
+ 
+   *(pointer+c) = '\0';
+ 
+   return pointer;
+}
+
+char *toPascalComment(char *str) {
+	char *subs = substring(str, 2, strlen(str) - 2);
+	return subs;
+}
+
+
 %}
 
 %option noyywrap
@@ -56,7 +86,7 @@ Identifier				[A-z][A-z0-9]*
 {Blanks}				{ printf(" "); }
 {Tabs}					{ printf( "%s", yytext); }
 [-,:;.(){}\[\]*/+<=>]	{ printf( "%s", yytext ); }
-{Comment}				{ printf( "%s", yytext ); }
+{Comment}				{ printf( "(*%s*)", toPascalComment(yytext)); }
 {String}				{ printf( "%s", yytext ); }
 {Integer}				{ printf( "%s", yytext ); }
 
