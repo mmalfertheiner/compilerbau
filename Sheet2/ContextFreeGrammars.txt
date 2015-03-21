@@ -1,0 +1,12 @@
+Context free grammars:
+
+
+1) program {name}; var ...; begin ... end end.
+2) var assignment, arrays?
+3) read
+4) write
+5) while loop
+6) if else
+7) comparison
+8) math +,-,*,/,(), mod
+9) for loop

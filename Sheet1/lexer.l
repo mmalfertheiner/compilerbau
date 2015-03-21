@@ -76,16 +76,16 @@ Comment					\{.*\}
 Blanks					[ ]+
 Tabs					[\t]+
 NewLines				[\n]+
-String					\".*\"
+String					\"[^\"]*\"
 Integer 				[0-9]+
-Identifier				[A-z][A-z0-9]*
+Identifier				[A-z_][A-z0-9_]*
 
 %%
 
 {NewLines}				{ yylineno++; printf("\n"); }
 {Blanks}				{ printf(" "); }
 {Tabs}					{ printf( "%s", yytext); }
-[-,:;.(){}\[\]*/+<=>]	{ printf( "%s", yytext ); }
+[-,:;.(){}\[\]*/+<=>]			{ printf( "%s", yytext ); }
 {Comment}				{ printf( "(*%s*)", toPascalComment(yytext)); }
 {String}				{ printf( "%s", yytext ); }
 {Integer}				{ printf( "%s", yytext ); }
@@ -119,9 +119,9 @@ Identifier				[A-z][A-z0-9]*
 "var"					{ printf( "%s", toUpperCase(yytext)); }
 "while"					{ printf( "%s", toUpperCase(yytext)); }
 "write"					{ printf( "%s", toUpperCase(yytext)); }
-{Identifier}			{ printf( "%s", toLowerCase(yytext)); }
+{Identifier}				{ printf( "%s", toLowerCase(yytext)); }
 
-.						{ yyerror(yytext); }
+.					{ yyerror(yytext); }
 
 %%
 
