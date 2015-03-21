@@ -2,9 +2,79 @@
 #include <stdio.h>
 #include <string.h>
 
+
+void yyerror(char *s);
+
+void maxNestingLevel( int nestingLevel);
+
+char *toUpperCase ( char *str );
+
+char *toLowerCase ( char *str );
+
+char *substring(char *str, int position, int length);
+
+char *toPascalComment(char *str);
+
+int nesting = 0;
+int maxNesting = 0;
+int totalComments = 0;
+
+%}
+
+%option noyywrap
+
+%x MODULACOMMENT
+
+Blanks					[ ]+
+Tabs					[\t]+
+NewLines				[\n]+
+String					\"[^\"]*\"
+Digit					[0-9]
+Integer 				{Digit}+
+Float					{Digit}+.{Digit}*
+Identifier				[A-z_][A-z0-9_]*
+OldComment				\{[^\}]*\}
+OpenCom					"(*"
+CloseCom				"*)"
+
+KeyWords				"and"|"array"|"begin"|"div"|"do"|"else"|"end"|"false"|"for"|"if"|"integer"|"repeat"|"until"|"mod"|"of"|"program"|"read"|"real"|"then"|"to"|"true"|"var"|"while"|"write"
+Operations				":="|"<="|">="|"<>"
+
+%%
+
+{NewLines}						{ yylineno++; printf("\n"); }
+{Blanks}						{ printf(" "); }
+{Tabs}							{ printf( "%s", yytext); }
+
+{OpenCom}						{ BEGIN MODULACOMMENT; nesting = 0; totalComments++; printf( "%s", yytext );}
+<MODULACOMMENT>{OpenCom}		{ nesting++; totalComments++; printf( "%s", yytext );}
+<MODULACOMMENT>{CloseCom}		{ maxNestingLevel(nesting); printf( "%s", yytext ); if (nesting == 0) { BEGIN INITIAL; } else { nesting--; }}
+<MODULACOMMENT><<EOF>> 			{ if (nesting > 0) { yyerror("Missing closing comment tag."); exit(0); }}
+<MODULACOMMENT>.				{ printf( "%s", yytext ); }
+
+{OldComment}					{ printf( "(*%s*)", toPascalComment(yytext)); }
+[-,:;.(){}\[\]*/+<=>]			{ printf( "%s", yytext ); }
+{String}						{ printf( "%s", yytext ); }
+{Integer}						{ printf( "%s", yytext ); }
+{Float}							{ printf( "%s", yytext ); }
+
+{Operations} 					{ printf( "%s", yytext ); }
+{KeyWords} 						{ printf( "%s", toUpperCase(yytext)); }
+{Identifier}					{ printf( "%s", toLowerCase(yytext)); }
+
+.								{ yyerror(yytext); }
+
+%%
+
 void yyerror(char *s)
 {
     printf("Error at line %d: %s at %s\n", yylineno, s, yytext);
+}
+
+void maxNestingLevel( int nestingLevel) {
+	if (maxNesting <= nestingLevel) {
+		maxNesting = nestingLevel;
+	}
 }
 
 char *toUpperCase ( char *str )
@@ -66,67 +136,10 @@ char *toPascalComment(char *str) {
 	return subs;
 }
 
-
-%}
-
-%option noyywrap
-
-
-Comment					\{.*\}
-Blanks					[ ]+
-Tabs					[\t]+
-NewLines				[\n]+
-String					\"[^\"]*\"
-Integer 				[0-9]+
-Identifier				[A-z_][A-z0-9_]*
-
-%%
-
-{NewLines}				{ yylineno++; printf("\n"); }
-{Blanks}				{ printf(" "); }
-{Tabs}					{ printf( "%s", yytext); }
-[-,:;.(){}\[\]*/+<=>]			{ printf( "%s", yytext ); }
-{Comment}				{ printf( "(*%s*)", toPascalComment(yytext)); }
-{String}				{ printf( "%s", yytext ); }
-{Integer}				{ printf( "%s", yytext ); }
-
-
-":=" 					{ printf( "%s", yytext ); }
-"<="					{ printf( "%s", yytext ); }
-"<>"					{ printf( "%s", yytext ); }	
-"and" 					{ printf( "%s", toUpperCase(yytext)); }
-"array"					{ printf( "%s", toUpperCase(yytext)); }
-"begin"					{ printf( "%s", toUpperCase(yytext)); }
-"div"					{ printf( "%s", toUpperCase(yytext)); }
-"do"					{ printf( "%s", toUpperCase(yytext)); }
-"else"					{ printf( "%s", toUpperCase(yytext)); }
-"end"					{ printf( "%s", toUpperCase(yytext)); }
-"false"					{ printf( "%s", toUpperCase(yytext)); }
-"for"					{ printf( "%s", toUpperCase(yytext)); }
-"if"					{ printf( "%s", toUpperCase(yytext)); }
-"integer"				{ printf( "%s", toUpperCase(yytext)); }
-"procedure"				{ printf( "%s", toUpperCase(yytext)); }
-"repeat"				{ printf( "%s", toUpperCase(yytext)); }
-"until"					{ printf( "%s", toUpperCase(yytext)); }
-"mod"					{ printf( "%s", toUpperCase(yytext)); }
-"of"					{ printf( "%s", toUpperCase(yytext)); }
-"program"				{ printf( "%s", toUpperCase(yytext)); }
-"read"					{ printf( "%s", toUpperCase(yytext)); }
-"real"					{ printf( "%s", toUpperCase(yytext)); }
-"then"					{ printf( "%s", toUpperCase(yytext)); }
-"to"					{ printf( "%s", toUpperCase(yytext)); }
-"true"					{ printf( "%s", toUpperCase(yytext)); }
-"var"					{ printf( "%s", toUpperCase(yytext)); }
-"while"					{ printf( "%s", toUpperCase(yytext)); }
-"write"					{ printf( "%s", toUpperCase(yytext)); }
-{Identifier}				{ printf( "%s", toLowerCase(yytext)); }
-
-.					{ yyerror(yytext); }
-
-%%
-
 main(int argc, char **argv) {
   yylex();
+  printf("\n\nTotal comments: %i\n", totalComments);
+  printf("\n\nMax nesting level: %i\n", maxNesting);
   return 0;
 }
 
