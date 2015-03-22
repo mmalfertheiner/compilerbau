@@ -32,12 +32,13 @@ String					\"[^\"]*\"
 Digit					[0-9]
 Integer 				{Digit}+
 Float					{Digit}+.{Digit}*
+Real 					^[+-]?(?:\d+\.?\d*|\d*\.\d+)$
 Identifier				[A-z_][A-z0-9_]*
 OldComment				\{[^\}]*\}
 OpenCom					"(*"
 CloseCom				"*)"
 
-KeyWords				"and"|"array"|"begin"|"div"|"do"|"else"|"end"|"false"|"for"|"if"|"integer"|"repeat"|"until"|"mod"|"of"|"program"|"read"|"real"|"then"|"to"|"true"|"var"|"while"|"write"
+KeyWords				"and"|"array"|"begin"|"div"|"do"|"else"|"end"|"false"|"for"|"if"|"integer"|"repeat"|"until"|"mod"|"of"|"program"|"read"|"then"|"to"|"true"|"var"|"while"|"write"
 Operations				":="|"<="|">="|"<>"
 
 %%
@@ -48,8 +49,22 @@ Operations				":="|"<="|">="|"<>"
 
 {OpenCom}						{ BEGIN MODULACOMMENT; nesting = 0; totalComments++; printf( "%s", yytext );}
 <MODULACOMMENT>{OpenCom}		{ nesting++; totalComments++; printf( "%s", yytext );}
-<MODULACOMMENT>{CloseCom}		{ maxNestingLevel(nesting); printf( "%s", yytext ); if (nesting == 0) { BEGIN INITIAL; } else { nesting--; }}
-<MODULACOMMENT><<EOF>> 			{ if (nesting > 0) { yyerror("Missing closing comment tag."); exit(0); }}
+<MODULACOMMENT>{CloseCom}		{ 	maxNestingLevel(nesting); 
+									printf( "%s", yytext ); 
+									if (nesting == 0) 
+									{ 
+										BEGIN INITIAL; 
+									} else 
+									{ 
+										nesting--; 
+									}
+								}
+<MODULACOMMENT><<EOF>> 			{ 	if (nesting > 0) 
+									{ 
+										yyerror("Missing closing comment tag."); 
+										exit(0); 
+									}
+								}
 <MODULACOMMENT>.				{ printf( "%s", yytext ); }
 
 {OldComment}					{ printf( "(*%s*)", toPascalComment(yytext)); }
@@ -57,7 +72,7 @@ Operations				":="|"<="|">="|"<>"
 {String}						{ printf( "%s", yytext ); }
 {Integer}						{ printf( "%s", yytext ); }
 {Float}							{ printf( "%s", yytext ); }
-
+{Real}							{ printf( "%s", yytext ); }
 {Operations} 					{ printf( "%s", yytext ); }
 {KeyWords} 						{ printf( "%s", toUpperCase(yytext)); }
 {Identifier}					{ printf( "%s", toLowerCase(yytext)); }
