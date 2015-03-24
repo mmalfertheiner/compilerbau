@@ -31,14 +31,14 @@ NewLines				[\n]+
 String					\"[^\"]*\"
 Digit					[0-9]
 Integer 				{Digit}+
-Float					{Digit}+.{Digit}*
+Real					{Digit}+.{Digit}+
 Real 					^[+-]?(?:\d+\.?\d*|\d*\.\d+)$
 Identifier				[A-z_][A-z0-9_]*
 OldComment				\{[^\}]*\}
 OpenCom					"(*"
 CloseCom				"*)"
 
-KeyWords				"and"|"array"|"begin"|"div"|"do"|"else"|"end"|"false"|"for"|"if"|"integer"|"repeat"|"until"|"mod"|"of"|"program"|"read"|"then"|"to"|"true"|"var"|"while"|"write"
+KeyWords				"and"|"array"|"begin"|"div"|"do"|"else"|"end"|"false"|"for"|"if"|"integer"|"repeat"|"until"|"mod"|"of"|"program"|"read"|"string"|"then"|"to"|"true"|"var"|"while"|"write"
 Operations				":="|"<="|">="|"<>"
 
 %%

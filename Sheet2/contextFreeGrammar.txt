@@ -1,0 +1,54 @@
+ASSUMPTION: Comments are already stripped away by the lexer
+
+
+PROGRAM			->	'program' IDENTIFIER';' DEC-BLOCK SCOPE '.'
+
+SCOPE 			-> 	'begin' STATEMENT-LIST 'end'
+
+DEC-BLOCK		-> 	'var' DEC-LIST ';'
+
+DEC-LIST		->	DEC-LIST ';' DECLARATION | DECLARATION
+
+DECLARATION		->  ID-LIST ':' VAR-TYPE
+
+ID-LIST			-> 	ID-LIST ',' IDENTIFIER | IDENTIFIER
+
+VAR-TYPE		-> 	TYPE | 'array' '[' NUMBER '..' NUMBER ']' 'of' TYPE
+
+TYPE			-> 	'real' | 'integer' | 'string'
+
+STATEMENT-LIST	->	STATEMENT-LIST ; STATEMENT | STATEMENT
+
+STATEMENT 		->	'read' '(' IO-LIST ')'
+				|	'write' '(' IO-LIST ')'
+				|	IDENTIFIER INDEX ':=' EXPRESSION
+				|	'while' EXPRESSION 'do' SCOPE
+				|	'if' EXPRESSION 'THEN' BODY ELSE-PART
+				|	'for' IDENTIFIER ':=' SIMPLE-EXPR 'to' SIMPLE-EXPR 'do' BODY
+
+BODY			->	SCOPE | STATEMENT
+
+IO-LIST 		->	IO-LIST ',' IDENTIFIER
+				|	IO-LIST ',' STRING
+				|	IDENTIFIER
+				|	STRING
+
+INDEX			->	'[' SIMPLE-EXPR ']'
+				|	ε
+
+EXPRESSION 		->	EXPRESSION COMP-OP SIMPLE-EXPR
+				|	SIMPLE-EXPR
+
+SIMPLE-EXPR 	-> SIMPLE-EXPR ADD-OP TERM
+				|	TERM
+
+TERM			-> 	TERM MULT-OP FACTOR
+				|	FACTOR
+
+FACTOR			->	INTEGER | REAL | 'true' | 'false' | IDENTIFIER INDEX
+
+COMP-OP			-> "<="|">="|"<>"
+
+ADD-OP			-> '+' | '-'
+
+MULT-OP			-> '*' | '/' | 'mod'
