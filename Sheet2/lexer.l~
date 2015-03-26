@@ -32,6 +32,7 @@ String					\"[^\"]*\"
 Digit					[0-9]
 Integer 				{Digit}+
 Real					{Digit}+.{Digit}+
+Real 					^[+-]?(?:\d+\.?\d*|\d*\.\d+)$
 Identifier				[A-z_][A-z0-9_]*
 OldComment				\{[^\}]*\}
 OpenCom					"(*"
@@ -70,6 +71,7 @@ Operations				":="|"<="|">="|"<>"
 [-,:;.(){}\[\]*/+<=>]			{ printf( "%s", yytext ); }
 {String}						{ printf( "%s", yytext ); }
 {Integer}						{ printf( "%s", yytext ); }
+{Float}							{ printf( "%s", yytext ); }
 {Real}							{ printf( "%s", yytext ); }
 {Operations} 					{ printf( "%s", yytext ); }
 {KeyWords} 						{ printf( "%s", toUpperCase(yytext)); }
