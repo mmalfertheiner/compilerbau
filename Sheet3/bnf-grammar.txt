@@ -1,0 +1,82 @@
+BNF Grammar
+
+start 			→ PROGRAM IDENT ; varDec compStmt .
+
+varDec 			→ VAR varDecList
+				| ε
+			
+varDecList 		→ varDecList varDecList'
+varDecList'		→ identListType ; varDecList'
+				| ε
+			
+identListType 	→ identList : type
+
+identList 		→ identList , IDENT
+				| IDENT
+				
+type 			→ simpleType
+				| ARRAY [ NUM .. NUM ] OF simpleType
+				
+simpleType 		→ INTEGER
+				| REAL
+				| BOOLEAN
+				
+compStmt 		→ BEGIN stmtList END
+
+stmtList 		→ stmtList stmtList'
+stmtList'		→ ; statement stmtList'
+				| ε
+				
+statement 		→ assignStmt
+				| compStmt
+				| ifStmt
+				| whileStmt
+				| forStmt
+				
+assignStmt 		→ IDENT := expr
+				| IDENT index := expr
+				
+index 			→ [ simpleExpr ]
+				| [ simpleExpr .. simpleExpr ]
+				
+ifStmt 			→ IF expr THEN statement elsePart
+
+elsePart 		→ ELSE statement
+				| ε
+				
+whileStmt 		→ WHILE expr DO statement
+
+forStmt 		→ FOR IDENT := expr toPart expr DO statement
+
+toPart 			→ TO | DOWNTO
+
+exprList 		→ exprList exprList'
+exprList'		→ , expr exprList'
+				| ε
+				
+expr 			→ simpleExpr expr'
+expr'			→ relOp simpleExpr expr' 
+				| ε
+				
+simpleExpr 		→ simpleExpr simpleExpr'
+simpleExpr' 	→ addOp term simpleExpr'
+				| ε
+				
+term 			→ term term'
+term'			→ mulOp factor term'
+				| ε
+				
+factor 			→ NUM
+				| FALSE
+				| TRUE
+				| IDENT
+				| IDENT index
+				| NOT factor
+				| – factor
+				| ( exp )
+				
+relOp 			→ < | <= | > | >= | = | <>
+
+addOp			→ + | – | OR
+
+mulOp 			→ * | / | DIV | MOD | AND

@@ -32,7 +32,6 @@ String					\"[^\"]*\"
 Digit					[0-9]
 Integer 				{Digit}+
 Real					{Digit}+.{Digit}+
-Real 					^[+-]?(?:\d+\.?\d*|\d*\.\d+)$
 Identifier				[A-z_][A-z0-9_]*
 OldComment				\{[^\}]*\}
 OpenCom					"(*"
@@ -47,19 +46,30 @@ Operations				":="|"<="|">="|"<>"
 {Blanks}						{ printf(" "); }
 {Tabs}							{ printf( "%s", yytext); }
 
-{OpenCom}						{ BEGIN MODULACOMMENT; nesting = 0; totalComments++; printf( "%s", yytext );}
-<MODULACOMMENT>{OpenCom}		{ nesting++; totalComments++; printf( "%s", yytext );}
-<MODULACOMMENT>{CloseCom}		{ 	maxNestingLevel(nesting); 
+{OpenCom}						{ 
+									BEGIN MODULACOMMENT; 
+									nesting = 0; 
+									totalComments++; 
+									printf( "%s", yytext );}
+<MODULACOMMENT>{OpenCom}		{ 
+									nesting++; 
+									totalComments++; 
+									printf( "%s", yytext );
+								}
+<MODULACOMMENT>{CloseCom}		{ 	
+									maxNestingLevel(nesting); 
 									printf( "%s", yytext ); 
 									if (nesting == 0) 
 									{ 
 										BEGIN INITIAL; 
-									} else 
+									} 
+									else 
 									{ 
 										nesting--; 
 									}
 								}
-<MODULACOMMENT><<EOF>> 			{ 	if (nesting > 0) 
+<MODULACOMMENT><<EOF>> 			{ 	
+									if (nesting > 0) 
 									{ 
 										yyerror("Missing closing comment tag."); 
 										exit(0); 
@@ -71,7 +81,6 @@ Operations				":="|"<="|">="|"<>"
 [-,:;.(){}\[\]*/+<=>]			{ printf( "%s", yytext ); }
 {String}						{ printf( "%s", yytext ); }
 {Integer}						{ printf( "%s", yytext ); }
-{Float}							{ printf( "%s", yytext ); }
 {Real}							{ printf( "%s", yytext ); }
 {Operations} 					{ printf( "%s", yytext ); }
 {KeyWords} 						{ printf( "%s", toUpperCase(yytext)); }
