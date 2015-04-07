@@ -33,11 +33,13 @@ statement 		→ assignStmt
 				| whileStmt
 				| forStmt
 				
-assignStmt 		→ IDENT := expr
-				| IDENT index := expr
-				
-index 			→ [ simpleExpr ]
-				| [ simpleExpr .. simpleExpr ]
+assignStmt 		→ IDENT assignStmt'
+assignStmt'		→ := expr
+				| index := expr
+
+index 			→ [ simpleExpr index'
+index'			→ ]
+				| .. simpleExpr ]
 				
 ifStmt 			→ IF expr THEN statement elsePart
 
@@ -69,11 +71,12 @@ term'			→ mulOp factor term'
 factor 			→ NUM
 				| FALSE
 				| TRUE
-				| IDENT
-				| IDENT index
+				| IDENT factor'
 				| NOT factor
 				| – factor
 				| ( exp )
+factor'			→ index
+				| ε
 				
 relOp 			→ < | <= | > | >= | = | <>
 
