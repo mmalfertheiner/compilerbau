@@ -3,6 +3,7 @@
 #include <string.h>
 
 void yyerror(char* s);
+void compStmt();
 
 
 enum Token {
@@ -26,6 +27,7 @@ enum Token {
 	Token_for,
 	Token_identifier, 
 	Token_if, 
+	Token_Integer,
 	Token_integer, 
 	Token_lBracket, 
 	Token_leq, 
@@ -38,10 +40,12 @@ enum Token {
 	Token_program, 
 	Token_rBracket,
 	Token_read, 
+	Token_Real, 
 	Token_real, 
 	Token_repeat, 
 	Token_rRectBracket, 
 	Token_semicolon, 
+	Token_String, 
 	Token_string, 
 	Token_sub, 
 	Token_then, 
@@ -74,6 +78,7 @@ static char *TOKEN_STRING[] = {
 	"Token_for",
 	"Token_identifier", 
 	"Token_if", 
+	"Token_Integer", 
 	"Token_integer", 
 	"Token_lBracket", 
 	"Token_leq", 
@@ -86,10 +91,12 @@ static char *TOKEN_STRING[] = {
 	"Token_program", 
 	"Token_rBracket",
 	"Token_read", 
+	"Token_Real",
 	"Token_real", 
 	"Token_repeat", 
 	"Token_rRectBracket", 
 	"Token_semicolon", 
+	"Token_String",
 	"Token_string", 
 	"Token_sub", 
 	"Token_then", 
@@ -110,7 +117,7 @@ void match(enum Token type){
 		char tmp[100];
 		strcpy(tmp, yytext);
 		currentToken = yylex();
-		printf("%s--->%s\n", tmp, yytext);
+		printf("%s ------next Token------> %s\n", tmp, yytext);
 	} 
 	else 
 	{
@@ -120,10 +127,167 @@ void match(enum Token type){
 
 }
 
+void assignStmt(){
+	printf("%d: assignStmt\n", yylineno);
+}
 
+void ifStmt(){
+	printf("%d: ifStmt\n", yylineno);
+}
+
+void whileStmt(){
+	printf("%d: whileStmt\n", yylineno);
+}
+
+void forStmt(){
+	printf("%d: forStmt\n", yylineno);
+}
+
+/*
+	statement 		→ assignStmt
+					| compStmt
+					| ifStmt
+					| whileStmt
+					| forStmt
+*/
+void statement(){
+	printf("%d: statement\n", yylineno);
+	switch(currentToken){
+		case Token_identifier:
+			assignStmt();
+			break;
+		case Token_begin:
+			compStmt();
+			break;
+		case Token_if:
+			ifStmt();
+			break;
+		case Token_while:
+			whileStmt();
+			break;
+		case Token_for:
+			forStmt();
+		default:
+			yyerror(TOKEN_STRING[currentToken]);
+	}
+}
+
+/*
+	stmtList 		→ stmtList stmtList'
+	stmtList'		→ ; statement stmtList'
+					| ε
+*/
+void stmtList(){
+	printf("%d: stmtList\n", yylineno);
+	statement();
+	while (errorMessage == 0 && currentToken == Token_colon){
+		match(Token_colon);
+		statement();
+	}
+}
+
+
+/*
+	compStmt 		→ BEGIN stmtList END
+*/
+void compStmt(){
+	printf("%d: compStmt\n", yylineno);
+	match(Token_begin);
+	stmtList();
+	match(Token_end);
+}
+
+/*
+	identList 		→ identList , IDENT
+					| IDENT
+*/
+void identList(){
+	printf("%d: identList\n", yylineno);
+	match(Token_identifier);
+	while (errorMessage == 0 && currentToken == Token_comma){
+		match(Token_comma);
+		match(Token_identifier);
+	}
+}
+
+void simpleType(){
+	printf("%d: simpleType\n", yylineno);
+	switch(currentToken){
+		case Token_real:
+			match(Token_real);
+			break;
+		case Token_integer:
+			match(Token_integer);
+			break;
+		case Token_string:
+			match(Token_string);
+			break;
+		default:
+			yyerror(TOKEN_STRING[currentToken]);
+	}
+}
+
+/*
+	type 			→ simpleType
+				| ARRAY [ NUM .. NUM ] OF simpleType
+*/
+void type(){
+	printf("%d: type\n", yylineno);
+	switch(currentToken){
+		case Token_array:
+			match(Token_array);
+			match(Token_lRectBracket);
+			match(Token_Integer);
+			match(Token_dot);
+			match(Token_dot);
+			match(Token_Integer);
+			match(Token_rRectBracket);
+			match(Token_of);
+			simpleType();
+			break;
+		default:
+			simpleType();
+	}
+}
+
+/*
+	identListType 	→ identList : type	
+*/
+void identListType(){
+	printf("%d: identListType\n", yylineno);
+	identList();
+	match(Token_colon);
+	type();
+	printf("%d: End identListType\n", yylineno);
+}
+
+
+/*
+	varDecList 		→ varDecList varDecList'
+	varDecList'		→ identListType ; varDecList'
+					|ε
+*/
+void varDecList(){
+	printf("%d: varDecList\n", yylineno);
+	identListType();
+	while (errorMessage == 0 && currentToken == Token_semicolon){
+		match(Token_semicolon);
+		if (currentToken == Token_identifier)
+			identListType();
+	}
+	
+	printf("%d: End varDecList\n", yylineno);
+}
+
+/*
+	varDec 			→ VAR varDecList
+					| ε
+*/
 void varDec(){
 	printf("%d: varDec\n", yylineno);
 	match(Token_var);
+	varDecList();
+	printf("%d: End varDec\n", yylineno);	
 }
 
 /*
@@ -133,12 +297,11 @@ void start() {
 	currentToken = yylex();
 
 	printf("%d: start\n", yylineno);
-	printf("%s\n", TOKEN_STRING[currentToken]);
 	match(Token_program);
 	match(Token_identifier);
 	match(Token_semicolon);
 	varDec();
-	//compStmt();Token_program
+	compStmt();
 	match(Token_dot);
 	printf("%d: End of start\n", yylineno);
 }
@@ -165,10 +328,14 @@ CloseCom				"*)"
 {NewLines}				{ yylineno++; }
 {Blanks}				
 {Tabs}							
-{OldComment}				
-{String}				return Token_string;
-{Integer}				return Token_integer;
+{OldComment}			{ yylineno++; }
+{String}				return Token_String;
+{Integer}				return Token_Integer;
+{Real}					return Token_Real;
 
+"integer"				return Token_integer;
+"real"					return Token_real;
+"string"				return Token_string;
 ":=" 					return Token_assign;
 "<="					return Token_leq;
 "<>"					return Token_noteq;	
