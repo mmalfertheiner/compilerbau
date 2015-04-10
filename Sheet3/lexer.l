@@ -2,18 +2,103 @@
 #include <stdio.h>
 #include <string.h>
 
-void yyerror(char *s);
+void yyerror(char* s);
 
 
 enum Token {
-	Token_assign, Token_leq, Token_noteq, Token_and, Token_array,
-	Token_begin, Token_div, Token_do, Token_else, Token_end, Token_false, Token_for,
-	Token_if, Token_integer, Token_repeat, Token_until, Token_mod, 
-	Token_of, Token_program, Token_read, Token_real, Token_then, Token_to, Token_true, 
-	Token_var, Token_while, Token_write, Token_identifier, Token_string, Token_error,
-	Token_add, Token_sub, Token_mult, Token_divide, Token_less, Token_bigger, Token_eq, 
-	Token_comma, Token_semicolon, Token_colon, Token_dot, Token_lRectBracket, 
-	Token_rRectBracket, Token_lBracket, Token_rBracket,
+	Token_add, 
+	Token_and, 
+	Token_array,
+	Token_assign, 
+	Token_begin, 
+	Token_bigger, 
+	Token_colon, 
+	Token_comma, 
+	Token_div, 
+	Token_divide, 
+	Token_do, 
+	Token_dot, 
+	Token_else, 
+	Token_end, 
+	Token_eq, 
+	Token_error,
+	Token_false, 
+	Token_for,
+	Token_identifier, 
+	Token_if, 
+	Token_integer, 
+	Token_lBracket, 
+	Token_leq, 
+	Token_less, 
+	Token_lRectBracket, 
+	Token_mod, 
+	Token_mult, 
+	Token_noteq, 
+	Token_of, 
+	Token_program, 
+	Token_rBracket,
+	Token_read, 
+	Token_real, 
+	Token_repeat, 
+	Token_rRectBracket, 
+	Token_semicolon, 
+	Token_string, 
+	Token_sub, 
+	Token_then, 
+	Token_to, 
+	Token_true, 
+	Token_until, 
+	Token_var, 
+	Token_while, 
+	Token_write, 
+};
+
+static char *TOKEN_STRING[] = {
+	"Token_add", 
+	"Token_and", 
+	"Token_array",
+	"Token_assign", 
+	"Token_begin", 
+	"Token_bigger", 
+	"Token_colon", 
+	"Token_comma", 
+	"Token_div", 
+	"Token_divide", 
+	"Token_do", 
+	"Token_dot", 
+	"Token_else", 
+	"Token_end", 
+	"Token_eq", 
+	"Token_error",
+	"Token_false", 
+	"Token_for",
+	"Token_identifier", 
+	"Token_if", 
+	"Token_integer", 
+	"Token_lBracket", 
+	"Token_leq", 
+	"Token_less", 
+	"Token_lRectBracket", 
+	"Token_mod", 
+	"Token_mult", 
+	"Token_noteq", 
+	"Token_of", 
+	"Token_program", 
+	"Token_rBracket",
+	"Token_read", 
+	"Token_real", 
+	"Token_repeat", 
+	"Token_rRectBracket", 
+	"Token_semicolon", 
+	"Token_string", 
+	"Token_sub", 
+	"Token_then", 
+	"Token_to", 
+	"Token_true", 
+	"Token_until", 
+	"Token_var", 
+	"Token_while", 
+	"Token_write",
 };
 
 enum Token currentToken;
@@ -30,23 +115,32 @@ void match(enum Token type){
 	else 
 	{
 		if (errorMessage == 0)
-			yyerror("type");
+			yyerror(TOKEN_STRING[type]);
 	}
 
 }
 
 
-void programStart() {
+void varDec(){
+	printf("%d: varDec\n", yylineno);
+	match(Token_var);
+}
+
+/*
+	start 			→ PROGRAM IDENT ; varDec compStmt .
+*/
+void start() {
 	currentToken = yylex();
 
-	printf("%d:program\n", yylineno);
+	printf("%d: start\n", yylineno);
+	printf("%s\n", TOKEN_STRING[currentToken]);
 	match(Token_program);
 	match(Token_identifier);
 	match(Token_semicolon);
-	//varDec();
-	//compStmt();
+	varDec();
+	//compStmt();Token_program
 	match(Token_dot);
-	printf("%d:End of program\n", yylineno);
+	printf("%d: End of start\n", yylineno);
 }
 
 %}
@@ -130,7 +224,8 @@ void yyerror(char *s)
 
 
 main(int argc, char **argv) {
-  yylex();
-  return 0;
+	start();
+
+  	return 0;
 }
 
