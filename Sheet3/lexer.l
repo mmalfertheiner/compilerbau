@@ -8,6 +8,7 @@ void expr();
 void simpleExpr();
 void statement();
 void term();
+void factor();
 void addOp();
 void mulOp();
 
@@ -138,6 +139,15 @@ void match(enum Token type){
 }
 
 /*
+	mulOp 			→ * | / | DIV | MOD | AND
+*/
+void mulOp(){
+	printf("%d: addOp\n", yylineno);
+	match(currentToken);
+}
+
+
+/*
 	addOp			→ + | – | OR
 */
 void addOp(){
@@ -202,6 +212,26 @@ void simpleExpr(){
 */
 void term(){
 	printf("%d: term\n", yylineno);
+	factor();
+	while(errorMessage == 0 && (currentToken == Token_mult || currentToken == Token_divide || currentToken == Token_div || currentToken == Token_mod || currentToken == Token_and)){
+		mulOp();
+		factor();
+	}
+}
+
+/*
+	factor 		→ NUM
+				| FALSE
+				| TRUE
+				| IDENT factor'
+				| NOT factor
+				| – factor
+				| ( exp )
+	factor'		→ index
+				| ε
+*/
+void factor(){
+	printf("%d: factor\n", yylineno);
 }
 
 
