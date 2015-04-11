@@ -10,8 +10,7 @@ program minipas;
 	begin
 	
 		{ Calculate greatest common divisor of x and y }
-		(* Test *)
-		read(x, y);
+		{read(x, y);}
 		while x * y <> 0 do
 		begin
 			if x > y then

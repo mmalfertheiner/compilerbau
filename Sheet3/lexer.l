@@ -4,6 +4,12 @@
 
 void yyerror(char* s);
 void compStmt();
+void expr();
+void simpleExpr();
+void statement();
+void term();
+void addOp();
+void mulOp();
 
 
 enum Token {
@@ -11,7 +17,8 @@ enum Token {
 	Token_and, 
 	Token_array,
 	Token_assign, 
-	Token_begin, 
+	Token_begin,
+	Token_beq, 
 	Token_bigger, 
 	Token_colon, 
 	Token_comma, 
@@ -36,7 +43,8 @@ enum Token {
 	Token_mod, 
 	Token_mult, 
 	Token_noteq, 
-	Token_of, 
+	Token_of,
+	Token_or, 
 	Token_program, 
 	Token_rBracket,
 	Token_read, 
@@ -62,7 +70,8 @@ static char *TOKEN_STRING[] = {
 	"Token_and", 
 	"Token_array",
 	"Token_assign", 
-	"Token_begin", 
+	"Token_begin",
+	"Token_beq", 
 	"Token_bigger", 
 	"Token_colon", 
 	"Token_comma", 
@@ -87,7 +96,8 @@ static char *TOKEN_STRING[] = {
 	"Token_mod", 
 	"Token_mult", 
 	"Token_noteq", 
-	"Token_of", 
+	"Token_of",
+	"Token_or", 
 	"Token_program", 
 	"Token_rBracket",
 	"Token_read", 
@@ -127,6 +137,74 @@ void match(enum Token type){
 
 }
 
+/*
+	addOp			→ + | – | OR
+*/
+void addOp(){
+	printf("%d: addOp\n", yylineno);
+	match(currentToken);
+}
+
+/*
+	relOp 			→ < | <= | > | >= | = | <>
+*/
+void relOp(){
+	printf("%d: relOp\n", yylineno);
+	match(currentToken);
+}
+
+/*
+	exprList 		→ exprList exprList'
+	exprList'		→ , expr exprList'
+					| ε
+*/
+void exprList(){
+	printf("%d: exprList\n", yylineno);
+	expr();
+	while (errorMessage == 0 && currentToken == Token_colon){
+		match(Token_colon);
+		expr();
+	}
+}
+
+/*
+	expr 			→ simpleExpr expr'
+	expr'			→ relOp simpleExpr expr' 
+					| ε
+*/
+void expr(){
+	printf("%d: expr\n", yylineno);
+	simpleExpr();
+	while (errorMessage == 0 && (currentToken == Token_less || currentToken == Token_leq || currentToken == Token_bigger || currentToken == Token_beq || currentToken == Token_eq || currentToken == Token_noteq)){
+		relOp();
+		simpleExpr();
+	}
+}
+
+/*
+simpleExpr 		→ term simpleExpr'
+simpleExpr' 	→ addOp term simpleExpr'
+				| ε
+*/
+void simpleExpr(){
+	printf("%d: simpleExpr\n", yylineno);
+	term();
+	while(errorMessage == 0 && (currentToken == Token_add || currentToken == Token_sub || currentToken == Token_or)){
+		addOp();
+		term();
+	}
+}
+
+/*
+	term 			→ factor term'
+	term'			→ mulOp factor term'
+					| ε
+*/
+void term(){
+	printf("%d: term\n", yylineno);
+}
+
+
 void assignStmt(){
 	printf("%d: assignStmt\n", yylineno);
 }
@@ -135,8 +213,16 @@ void ifStmt(){
 	printf("%d: ifStmt\n", yylineno);
 }
 
+/*
+	whileStmt 		→ WHILE expr DO statement
+*/
+
 void whileStmt(){
 	printf("%d: whileStmt\n", yylineno);
+	match(Token_while);
+	expr();
+	match(Token_do);
+	statement();
 }
 
 void forStmt(){
@@ -167,6 +253,7 @@ void statement(){
 			break;
 		case Token_for:
 			forStmt();
+			break;
 		default:
 			yyerror(TOKEN_STRING[currentToken]);
 	}
@@ -338,7 +425,8 @@ CloseCom				"*)"
 "string"				return Token_string;
 ":=" 					return Token_assign;
 "<="					return Token_leq;
-"<>"					return Token_noteq;	
+"<>"					return Token_noteq;
+">="					return Token_beq;		
 "and" 					return Token_and;
 "array"					return Token_array;
 "begin"					return Token_begin;
@@ -353,6 +441,7 @@ CloseCom				"*)"
 "until"					return Token_until;
 "mod"					return Token_mod;
 "of"					return Token_of;
+"OR"					return Token_or;
 "program"				return Token_program;
 "read"					return Token_read;
 "then"					return Token_then;
@@ -390,7 +479,7 @@ void yyerror(char *s)
 
 
 
-main(int argc, char **argv) {
+int main(int argc, char **argv) {
 	start();
 
   	return 0;

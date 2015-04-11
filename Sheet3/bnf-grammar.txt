@@ -60,11 +60,11 @@ expr 			→ simpleExpr expr'
 expr'			→ relOp simpleExpr expr' 
 				| ε
 				
-simpleExpr 		→ simpleExpr simpleExpr'
+simpleExpr 		→ term simpleExpr'
 simpleExpr' 	→ addOp term simpleExpr'
 				| ε
 				
-term 			→ term term'
+term 			→ factor term'
 term'			→ mulOp factor term'
 				| ε
 				
