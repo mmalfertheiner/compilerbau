@@ -7,6 +7,9 @@ void compStmt();
 void expr();
 void simpleExpr();
 void statement();
+void whileStmt();
+void ifStmt();
+void elsePart();
 void term();
 void factor();
 void addOp();
@@ -286,8 +289,27 @@ void assignStmt(){
 	printf("%d: assignStmt\n", yylineno);
 }
 
+
+/*
+	ifStmt 			→ IF expr THEN statement elsePart
+	elsePart 		→ ELSE statement
+					| ε
+*/
 void ifStmt(){
 	printf("%d: ifStmt\n", yylineno);
+	match(Token_if);
+	expr();
+	match(Token_then);
+	statement();
+	if(currentToken == Token_else){
+		elsePart();
+	}
+}
+
+void elsePart(){
+	printf("%d: elsePart\n", yylineno);
+	match(Token_else);
+	statement();
 }
 
 /*
