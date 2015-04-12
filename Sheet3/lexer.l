@@ -11,6 +11,7 @@ void term();
 void factor();
 void addOp();
 void mulOp();
+void arrayIndex();
 
 
 enum Token {
@@ -42,7 +43,8 @@ enum Token {
 	Token_less, 
 	Token_lRectBracket, 
 	Token_mod, 
-	Token_mult, 
+	Token_mult,
+	Token_not, 
 	Token_noteq, 
 	Token_of,
 	Token_or, 
@@ -96,7 +98,8 @@ static char *TOKEN_STRING[] = {
 	"Token_lRectBracket", 
 	"Token_mod", 
 	"Token_mult", 
-	"Token_noteq", 
+	"Token_noteq",
+	"Token_not",
 	"Token_of",
 	"Token_or", 
 	"Token_program", 
@@ -232,6 +235,50 @@ void term(){
 */
 void factor(){
 	printf("%d: factor\n", yylineno);
+	switch(currentToken){
+		case Token_Integer:
+			match(Token_Integer);
+			break;
+		case Token_Real:
+			match(Token_Real);
+			break;
+		case Token_false:
+			match(Token_false);
+			break;
+		case Token_true:
+			match(Token_true);
+			break;
+		case Token_identifier:
+			match(Token_identifier);
+			if(currentToken == Token_lRectBracket) {
+				arrayIndex();
+			}
+			break;
+		case Token_not:
+			match(Token_not);
+			factor();
+			break;
+		case Token_sub:
+			match(Token_sub);
+			factor();
+			break;
+		case Token_lBracket:
+			match(Token_lBracket);
+			expr();
+			match(Token_rBracket);
+			break;
+		default:
+			yyerror(TOKEN_STRING[currentToken]);
+	}
+}
+
+/*
+index 			→ [ simpleExpr index'
+index'			→ ]
+				| .. simpleExpr ]
+*/
+void arrayIndex(){
+	printf("%d: index\n", yylineno);
 }
 
 
@@ -470,8 +517,9 @@ CloseCom				"*)"
 "repeat"				return Token_repeat;
 "until"					return Token_until;
 "mod"					return Token_mod;
+"not"					return Token_not;
 "of"					return Token_of;
-"OR"					return Token_or;
+"or"					return Token_or;
 "program"				return Token_program;
 "read"					return Token_read;
 "then"					return Token_then;
