@@ -282,11 +282,29 @@ index'			→ ]
 */
 void arrayIndex(){
 	printf("%d: index\n", yylineno);
+	match(Token_lRectBracket);
+	simpleExpr();
+	if(currentToken == Token_dot){
+		match(Token_dot);
+		match(Token_dot);
+		simpleExpr();
+	}
+	match(Token_rRectBracket);
 }
 
-
+/*
+	assignStmt 		→ IDENT assignStmt'
+	assignStmt'		→ := expr
+					| index := expr
+*/
 void assignStmt(){
 	printf("%d: assignStmt\n", yylineno);
+	match(Token_identifier);
+	if(currentToken == Token_lRectBracket){
+		arrayIndex();
+	}
+	match(Token_assign);
+	expr();
 }
 
 
