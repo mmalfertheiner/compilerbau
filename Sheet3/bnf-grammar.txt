@@ -69,6 +69,7 @@ term'			→ mulOp factor term'
 				| ε
 				
 factor 			→ NUM
+				| STRING
 				| FALSE
 				| TRUE
 				| IDENT factor'

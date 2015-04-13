@@ -181,8 +181,8 @@ void relOp(){
 void exprList(){
 	printf("%d: exprList\n", yylineno);
 	expr();
-	while (errorMessage == 0 && currentToken == Token_colon){
-		match(Token_colon);
+	while (errorMessage == 0 && currentToken == Token_comma){
+		match(Token_comma);
 		expr();
 	}
 }
@@ -231,6 +231,7 @@ void term(){
 
 /*
 	factor 		→ NUM
+				| STRING
 				| FALSE
 				| TRUE
 				| IDENT factor'
@@ -248,6 +249,9 @@ void factor(){
 			break;
 		case Token_Real:
 			match(Token_Real);
+			break;
+		case Token_String:
+			match(Token_String);
 			break;
 		case Token_false:
 			match(Token_false);
