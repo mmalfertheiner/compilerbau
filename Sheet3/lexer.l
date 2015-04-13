@@ -9,6 +9,8 @@ void simpleExpr();
 void statement();
 void whileStmt();
 void ifStmt();
+void forStmt();
+void toPart();
 void elsePart();
 void term();
 void factor();
@@ -30,7 +32,8 @@ enum Token {
 	Token_div, 
 	Token_divide, 
 	Token_do, 
-	Token_dot, 
+	Token_dot,
+	Token_downTo, 
 	Token_else, 
 	Token_end, 
 	Token_eq, 
@@ -84,7 +87,8 @@ static char *TOKEN_STRING[] = {
 	"Token_div", 
 	"Token_divide", 
 	"Token_do", 
-	"Token_dot", 
+	"Token_dot",
+	"Token_downTo", 
 	"Token_else", 
 	"Token_end", 
 	"Token_eq", 
@@ -112,7 +116,7 @@ static char *TOKEN_STRING[] = {
 	"Token_real", 
 	"Token_repeat", 
 	"Token_rRectBracket", 
-	"Token_semicolon", 
+	"Token_semicolon",
 	"Token_String",
 	"Token_string", 
 	"Token_sub", 
@@ -342,8 +346,35 @@ void whileStmt(){
 	statement();
 }
 
+/*
+	forStmt 		→ FOR IDENT := expr toPart expr DO statement
+	toPart 			→ TO | DOWNTO
+*/
+
 void forStmt(){
 	printf("%d: forStmt\n", yylineno);
+	match(Token_for);
+	match(Token_identifier);
+	match(Token_assign);
+	expr();
+	toPart();
+	expr();
+	match(Token_do);
+	statement();
+}
+
+void toPart(){
+	printf("%d: forStmt\n", yylineno);
+	switch(currentToken){
+		case Token_to:
+			match(Token_to);
+			break;
+		case Token_downTo:
+			match(Token_downTo);
+			break;
+		default:
+			yyerror(TOKEN_STRING[currentToken]);
+	}
 }
 
 /*
@@ -352,6 +383,8 @@ void forStmt(){
 					| ifStmt
 					| whileStmt
 					| forStmt
+					| READ ( exprList )
+                    | WRITE ( exprList )
 */
 void statement(){
 	printf("%d: statement\n", yylineno);
@@ -370,6 +403,18 @@ void statement(){
 			break;
 		case Token_for:
 			forStmt();
+			break;
+		case Token_read:
+			match(Token_read);
+			match(Token_lBracket);
+			exprList();
+			match(Token_rBracket);
+			break;
+		case Token_write:
+			match(Token_write);
+			match(Token_lBracket);
+			exprList();
+			match(Token_rBracket);
 			break;
 		default:
 			yyerror(TOKEN_STRING[currentToken]);
@@ -549,6 +594,7 @@ CloseCom				"*)"
 "begin"					return Token_begin;
 "div"					return Token_div;
 "do"					return Token_do;
+"downto"				return Token_downTo;
 "else"					return Token_else;
 "end"					return Token_end;
 "false"					return Token_false;
