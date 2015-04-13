@@ -384,8 +384,8 @@ void statement(){
 void stmtList(){
 	printf("%d: stmtList\n", yylineno);
 	statement();
-	while (errorMessage == 0 && currentToken == Token_colon){
-		match(Token_colon);
+	while (errorMessage == 0 && currentToken == Token_semicolon){
+		match(Token_semicolon);
 		statement();
 	}
 }
