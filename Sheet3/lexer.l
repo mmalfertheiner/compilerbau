@@ -262,6 +262,7 @@ void factor(){
 		case Token_identifier:
 			match(Token_identifier);
 			if(currentToken == Token_lRectBracket) {
+				printf("%s\n\n\n", "In here");
 				arrayIndex();
 			}
 			break;
@@ -298,6 +299,7 @@ void arrayIndex(){
 		simpleExpr();
 	}
 	match(Token_rRectBracket);
+	
 }
 
 /*
@@ -569,9 +571,9 @@ Tabs					[\t]+
 NewLines				[\n]+
 String					\"[^\"]*\"
 Digit					[0-9]
-Integer 				{Digit}+
+Integer 				{Digit}+?
 Real					{Digit}+.{Digit}+
-Identifier				[A-z_][A-z0-9_]*
+Identifier				[A-z_][A-z0-9]*?
 OldComment				\{[^\}]*\}
 OpenCom					"(*"
 CloseCom				"*)"
@@ -632,8 +634,9 @@ CloseCom				"*)"
 "["						return Token_lRectBracket;
 "]"						return Token_rRectBracket;
 "("						return Token_lBracket;
-")"						return Token_rBracket;	
+")"						return Token_rBracket;
 {Identifier}			return Token_identifier;
+
 
 .					{ yyerror(yytext); return Token_error; }
 
