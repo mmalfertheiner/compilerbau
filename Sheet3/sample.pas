@@ -5,7 +5,7 @@
 program minipas;
 	
 	var x, y, i: integer;      
-	a: array [ 1..100 ] of real;
+	a: array [1..100] of real;
 
 	begin
 	
@@ -62,18 +62,18 @@ program minipas;
 		{ Sort an array of x elements }
 		read(x);
 		for i := 1 to x do
-			read(a [ i ]);
+			read(a[i]);
 		b := true;
 		while b do
 		begin
 			b := false;
 			for i := 1 to x do
 			begin
-				if a [ i ] > a [ i+1 ] then
+				if a[i] > a[i+1] then
 				begin
-					a [ i ] := a [ i ] + a [ i+1 ];
-					a [ i+1 ] := a [ i ] - a [ i+1 ];
-					a [ i ] := a [ i ] - a [ i+1 ];
+					a[i] := a[i] + a[i+1];
+					a[i+1] := a[i] - a[i+1];
+					a [i] := a [i] - a [i+1];
 					b := true
 				end
 			end

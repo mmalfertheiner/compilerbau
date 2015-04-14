@@ -573,7 +573,8 @@ String					\"[^\"]*\"
 Digit					[0-9]
 Integer 				{Digit}+?
 Real					{Digit}+.{Digit}+
-Identifier				[A-z_][A-z0-9]*?
+Letter					[A-Za-z]
+Identifier				({Letter}|_)({Letter}|[0-9])*?
 OldComment				\{[^\}]*\}
 OpenCom					"(*"
 CloseCom				"*)"
