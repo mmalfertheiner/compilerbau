@@ -32,6 +32,8 @@ statement 		→ assignStmt
 				| ifStmt
 				| whileStmt
 				| forStmt
+				| READ ( exprList )
+				| WRITE ( exprList )
 				
 assignStmt 		→ IDENT assignStmt'
 assignStmt'		→ := expr
@@ -50,7 +52,8 @@ whileStmt 		→ WHILE expr DO statement
 
 forStmt 		→ FOR IDENT := expr toPart expr DO statement
 
-toPart 			→ TO | DOWNTO
+toPart 			→ TO 
+				| DOWNTO
 
 exprList 		→ exprList exprList'
 exprList'		→ , expr exprList'
