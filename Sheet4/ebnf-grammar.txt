@@ -1,0 +1,67 @@
+start 			→ PROGRAM IDENT ; [ VAR varDecList ] compStmt .
+			
+varDecList 		→ identListType {; identListType}
+			
+identListType 	→ identList : type
+
+identList 		→ identList , IDENT
+				| IDENT
+				
+type 			→ simpleType
+				| ARRAY [ NUM .. NUM ] OF simpleType
+				
+simpleType 		→ INTEGER
+				| REAL
+				| BOOLEAN
+				
+compStmt 		→ BEGIN stmtList END
+
+stmtList 		→ statement {; statement}
+				
+statement 		→ assignStmt
+				| compStmt
+				| ifStmt
+				| whileStmt
+				| forStmt
+				| READ ( exprList )
+				| WRITE ( exprList )
+				
+assignStmt 		→ IDENT assignStmt'
+assignStmt'		→ := expr
+				| index := expr
+
+index 			→ [ simpleExpr index'
+index'			→ ]
+				| .. simpleExpr ]
+				
+ifStmt 			→ IF expr THEN statement [ ELSE statement ]
+				
+whileStmt 		→ WHILE expr DO statement
+
+forStmt 		→ FOR IDENT := expr toPart expr DO statement
+
+toPart 			→ TO 
+				| DOWNTO
+
+exprList 		→ expr {, expr}
+				
+expr 			→ simpleExpr {relOp simpleExpr}
+				
+simpleExpr 		→ term {addOp term}
+				
+term 			→ factor {mulOp factor}
+				
+factor 			→ NUM
+				| STRING
+				| FALSE
+				| TRUE
+				| IDENT [ index ]
+				| NOT factor
+				| – factor
+				| ( exp )
+				
+relOp 			→ < | <= | > | >= | = | <>
+
+addOp			→ + | – | OR
+
+mulOp 			→ * | / | DIV | MOD | AND
