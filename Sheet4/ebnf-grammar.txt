@@ -4,8 +4,7 @@ varDecList 		→ identListType {; identListType}
 			
 identListType 	→ identList : type
 
-identList 		→ identList , IDENT
-				| IDENT
+identList 		→ IDENT {, IDENT}
 				
 type 			→ simpleType
 				| ARRAY [ NUM .. NUM ] OF simpleType
@@ -26,13 +25,9 @@ statement 		→ assignStmt
 				| READ ( exprList )
 				| WRITE ( exprList )
 				
-assignStmt 		→ IDENT assignStmt'
-assignStmt'		→ := expr
-				| index := expr
+assignStmt 		→ IDENT [ index ] := expr
 
-index 			→ [ simpleExpr index'
-index'			→ ]
-				| .. simpleExpr ]
+index 			→ [ simpleExpr [.. simpleExpr] ]
 				
 ifStmt 			→ IF expr THEN statement [ ELSE statement ]
 				
