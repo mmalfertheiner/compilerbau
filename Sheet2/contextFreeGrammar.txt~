@@ -5,7 +5,7 @@ PROGRAM			->	'program' IDENTIFIER';' DEC-BLOCK SCOPE '.'
 
 SCOPE 			-> 	'begin' STATEMENT-LIST 'end'
 
-DEC-BLOCK		-> 	'var' DEC-LIST ';' | ε
+DEC-BLOCK		-> 	'var' DEC-LIST ';'
 
 DEC-LIST		->	DEC-LIST ';' DECLARATION | DECLARATION
 
