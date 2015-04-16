@@ -46,19 +46,30 @@ Operations				":="|"<="|">="|"<>"
 {Blanks}						{ printf(" "); }
 {Tabs}							{ printf( "%s", yytext); }
 
-{OpenCom}						{ BEGIN MODULACOMMENT; nesting = 0; totalComments++; printf( "%s", yytext );}
-<MODULACOMMENT>{OpenCom}		{ nesting++; totalComments++; printf( "%s", yytext );}
-<MODULACOMMENT>{CloseCom}		{ 	maxNestingLevel(nesting); 
+{OpenCom}						{ 
+									BEGIN MODULACOMMENT; 
+									nesting = 0; 
+									totalComments++; 
+									printf( "%s", yytext );}
+<MODULACOMMENT>{OpenCom}		{ 
+									nesting++; 
+									totalComments++; 
+									printf( "%s", yytext );
+								}
+<MODULACOMMENT>{CloseCom}		{ 	
+									maxNestingLevel(nesting); 
 									printf( "%s", yytext ); 
 									if (nesting == 0) 
 									{ 
 										BEGIN INITIAL; 
-									} else 
+									} 
+									else 
 									{ 
 										nesting--; 
 									}
 								}
-<MODULACOMMENT><<EOF>> 			{ 	if (nesting > 0) 
+<MODULACOMMENT><<EOF>> 			{ 	
+									if (nesting > 0) 
 									{ 
 										yyerror("Missing closing comment tag."); 
 										exit(0); 
