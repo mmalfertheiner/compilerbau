@@ -11,7 +11,7 @@ type 			→ simpleType
 				
 simpleType 		→ INTEGER
 				| REAL
-				| BOOLEAN
+				| STRING
 				
 compStmt 		→ BEGIN stmtList END
 

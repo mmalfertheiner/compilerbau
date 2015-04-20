@@ -1,6 +1,7 @@
 %{
 #include <stdio.h>
 #include <string.h>
+#include "sets.h"
 
 void yyerror(char* s);
 void compStmt();
