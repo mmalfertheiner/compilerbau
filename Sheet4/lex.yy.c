@@ -897,24 +897,22 @@ int errorMessage = 0;
 
 void match(enum Token type){
 	if (type == currentToken){
+		errorMessage = 0;
 		char tmp[100];
 		strcpy(tmp, yytext);
 		currentToken = yylex();
 		//printf("%s ------next Token------> %s\n", tmp, yytext);
-	} 
-	else 
-	{
-		if (errorMessage == 0)
-			yyerror(TOKEN_STRING[type]);
 	}
-
+	//else 
+	//{
+	//	yyerror(TOKEN_STRING[currentToken]);
+	//}
 }
 
 
 int isElementfollower(struct FirstFollow sets, enum Token currentToken){
 	int i;
 	for(i=0;i<sets.size_follow;i++){
-		printf("%s\n", TOKEN_STRING[sets.Follow[i]]);
 		if(sets.Follow[i]==currentToken || sets.Follow[i]==Token_epsilon){
 			return 1;
 		}
@@ -938,7 +936,7 @@ void scanto(struct FirstFollow sets){
      	char tmp[100];
         strcpy(tmp, yytext);
 		currentToken=yylex();
-		printf("%s--->%s   \n",tmp ,yytext);
+		printf("%s ---> %s CurrenToken: %s \n",tmp ,yytext, TOKEN_STRING[currentToken]);
   	} while (
   		!isElementfollower(sets,currentToken) 
   		&& currentToken != Token_EOF
@@ -947,17 +945,17 @@ void scanto(struct FirstFollow sets){
 
 void checkFirstFollow(struct FirstFollow sets){
     if(!isElementfirst(sets,currentToken)){
-		printf("\tError %s \n", yytext);
+		yyerror(TOKEN_STRING[currentToken]);
 		scanto(sets);
     }
 }
-
 
 /*
 	mulOp 			→ * | / | DIV | MOD | AND
 */
 void mulOp(){
 	//printf("%d: addOp\n", yylineno);
+	checkFirstFollow(MulOp_FirstFollow);
 	match(currentToken);
 }
 
@@ -967,6 +965,7 @@ void mulOp(){
 */
 void addOp(){
 	//printf("%d: addOp\n", yylineno);
+	checkFirstFollow(AddOp_FirstFollow);
 	match(currentToken);
 }
 
@@ -975,6 +974,7 @@ void addOp(){
 */
 void relOp(){
 	//printf("%d: relOp\n", yylineno);
+	checkFirstFollow(RelOp_FirstFollow);
 	match(currentToken);
 }
 
@@ -984,7 +984,7 @@ void relOp(){
 					| ε
 */
 void exprList(){
-	//printf("%d: exprList\n", yylineno);
+	checkFirstFollow(ExprList_FirstFollow);
 	expr();
 	while (errorMessage == 0 && currentToken == Token_comma){
 		match(Token_comma);
@@ -999,6 +999,7 @@ void exprList(){
 */
 void expr(){
 	//printf("%d: expr\n", yylineno);
+	checkFirstFollow(Expr_FirstFollow);
 	simpleExpr();
 	while (errorMessage == 0 && (currentToken == Token_less || currentToken == Token_leq || currentToken == Token_bigger || currentToken == Token_beq || currentToken == Token_eq || currentToken == Token_noteq)){
 		relOp();
@@ -1013,6 +1014,7 @@ simpleExpr' 	→ addOp term simpleExpr'
 */
 void simpleExpr(){
 	//printf("%d: simpleExpr\n", yylineno);
+	checkFirstFollow(SimpleExpr_FirstFollow);
 	term();
 	while(errorMessage == 0 && (currentToken == Token_add || currentToken == Token_sub || currentToken == Token_or)){
 		addOp();
@@ -1027,6 +1029,7 @@ void simpleExpr(){
 */
 void term(){
 	//printf("%d: term\n", yylineno);
+	checkFirstFollow(Term_FirstFollow);
 	factor();
 	while(errorMessage == 0 && (currentToken == Token_mult || currentToken == Token_divide || currentToken == Token_div || currentToken == Token_mod || currentToken == Token_and)){
 		mulOp();
@@ -1048,6 +1051,7 @@ void term(){
 */
 void factor(){
 	//printf("%d: factor\n", yylineno);
+	checkFirstFollow(Factor_FirstFollow);
 	switch(currentToken){
 		case Token_Integer:
 			match(Token_Integer);
@@ -1113,6 +1117,7 @@ void arrayIndex(){
 */
 void assignStmt(){
 	//printf("%d: assignStmt\n", yylineno);
+	checkFirstFollow(AssignStmt_FirstFollow);
 	match(Token_identifier);
 	if(currentToken == Token_lRectBracket){
 		arrayIndex();
@@ -1129,6 +1134,7 @@ void assignStmt(){
 */
 void ifStmt(){
 	//printf("%d: ifStmt\n", yylineno);
+	checkFirstFollow(IfStmt_FirstFollow);
 	match(Token_if);
 	expr();
 	match(Token_then);
@@ -1150,6 +1156,7 @@ void elsePart(){
 
 void whileStmt(){
 	//printf("%d: whileStmt\n", yylineno);
+	checkFirstFollow(WhileStmt_FirstFollow);
 	match(Token_while);
 	expr();
 	match(Token_do);
@@ -1163,6 +1170,7 @@ void whileStmt(){
 
 void forStmt(){
 	//printf("%d: forStmt\n", yylineno);
+	checkFirstFollow(ForStmt_FirstFollow);
 	match(Token_for);
 	match(Token_identifier);
 	match(Token_assign);
@@ -1175,6 +1183,7 @@ void forStmt(){
 
 void toPart(){
 	//printf("%d: forStmt\n", yylineno);
+	checkFirstFollow(ToPart_FirstFollow);
 	switch(currentToken){
 		case Token_to:
 			match(Token_to);
@@ -1198,6 +1207,7 @@ void toPart(){
 */
 void statement(){
 	//printf("%d: statement\n", yylineno);
+	checkFirstFollow(Statement_FirstFollow);
 	switch(currentToken){
 		case Token_identifier:
 			assignStmt();
@@ -1238,6 +1248,7 @@ void statement(){
 */
 void stmtList(){
 	//printf("%d: stmtList\n", yylineno);
+	checkFirstFollow(StmtList_FirstFollow);
 	statement();
 	while (errorMessage == 0 && currentToken == Token_semicolon){
 		match(Token_semicolon);
@@ -1251,6 +1262,7 @@ void stmtList(){
 */
 void compStmt(){
 	//printf("%d: compStmt\n", yylineno);
+	checkFirstFollow(CompStmt_FirstFollow);
 	match(Token_begin);
 	stmtList();
 	match(Token_end);
@@ -1272,6 +1284,7 @@ void identList(){
 
 void simpleType(){
 	//printf("%d: simpleType\n", yylineno);
+	checkFirstFollow(SimpleType_FirstFollow);
 	switch(currentToken){
 		case Token_real:
 			match(Token_real);
@@ -1293,6 +1306,7 @@ void simpleType(){
 */
 void type(){
 	//printf("%d: type\n", yylineno);
+	checkFirstFollow(Type_FirstFollow);
 	switch(currentToken){
 		case Token_array:
 			match(Token_array);
@@ -1368,7 +1382,7 @@ void start() {
 	//printf("%d: End of start\n", yylineno);
 }
 
-#line 1372 "lex.yy.c"
+#line 1386 "lex.yy.c"
 
 #define INITIAL 0
 
@@ -1555,10 +1569,10 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
     
-#line 838 "lexer.l"
+#line 852 "lexer.l"
 
 
-#line 1562 "lex.yy.c"
+#line 1576 "lex.yy.c"
 
 	if ( !(yy_init) )
 		{
@@ -1644,296 +1658,296 @@ do_action:	/* This label is used only to access EOF actions. */
 case 1:
 /* rule 1 can match eol */
 YY_RULE_SETUP
-#line 840 "lexer.l"
+#line 854 "lexer.l"
 { yylineno++; }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 841 "lexer.l"
+#line 855 "lexer.l"
 
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 842 "lexer.l"
+#line 856 "lexer.l"
 
 	YY_BREAK
 case 4:
 /* rule 4 can match eol */
 YY_RULE_SETUP
-#line 843 "lexer.l"
+#line 857 "lexer.l"
 { yylineno++; }
 	YY_BREAK
 case 5:
 /* rule 5 can match eol */
 YY_RULE_SETUP
-#line 844 "lexer.l"
+#line 858 "lexer.l"
 return Token_String;
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 845 "lexer.l"
+#line 859 "lexer.l"
 return Token_Integer;
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 846 "lexer.l"
+#line 860 "lexer.l"
 return Token_Real;
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 848 "lexer.l"
+#line 862 "lexer.l"
 return Token_integer;
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 849 "lexer.l"
+#line 863 "lexer.l"
 return Token_real;
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 850 "lexer.l"
+#line 864 "lexer.l"
 return Token_string;
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 851 "lexer.l"
+#line 865 "lexer.l"
 return Token_assign;
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 852 "lexer.l"
+#line 866 "lexer.l"
 return Token_leq;
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 853 "lexer.l"
+#line 867 "lexer.l"
 return Token_noteq;
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 854 "lexer.l"
+#line 868 "lexer.l"
 return Token_beq;		
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 855 "lexer.l"
+#line 869 "lexer.l"
 return Token_and;
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 856 "lexer.l"
+#line 870 "lexer.l"
 return Token_array;
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 857 "lexer.l"
+#line 871 "lexer.l"
 return Token_begin;
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 858 "lexer.l"
+#line 872 "lexer.l"
 return Token_div;
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 859 "lexer.l"
+#line 873 "lexer.l"
 return Token_do;
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 860 "lexer.l"
+#line 874 "lexer.l"
 return Token_downTo;
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 861 "lexer.l"
+#line 875 "lexer.l"
 return Token_else;
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 862 "lexer.l"
+#line 876 "lexer.l"
 return Token_end;
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 863 "lexer.l"
+#line 877 "lexer.l"
 return Token_false;
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 864 "lexer.l"
+#line 878 "lexer.l"
 return Token_for;
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 865 "lexer.l"
+#line 879 "lexer.l"
 return Token_if;
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 866 "lexer.l"
+#line 880 "lexer.l"
 return Token_repeat;
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 867 "lexer.l"
+#line 881 "lexer.l"
 return Token_until;
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 868 "lexer.l"
+#line 882 "lexer.l"
 return Token_mod;
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 869 "lexer.l"
+#line 883 "lexer.l"
 return Token_not;
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 870 "lexer.l"
+#line 884 "lexer.l"
 return Token_of;
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 871 "lexer.l"
+#line 885 "lexer.l"
 return Token_or;
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 872 "lexer.l"
+#line 886 "lexer.l"
 return Token_program;
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 873 "lexer.l"
+#line 887 "lexer.l"
 return Token_read;
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 874 "lexer.l"
+#line 888 "lexer.l"
 return Token_then;
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 875 "lexer.l"
+#line 889 "lexer.l"
 return Token_to;
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 876 "lexer.l"
+#line 890 "lexer.l"
 return Token_true;
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 877 "lexer.l"
+#line 891 "lexer.l"
 return Token_var;
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 878 "lexer.l"
+#line 892 "lexer.l"
 return Token_while;
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 879 "lexer.l"
+#line 893 "lexer.l"
 return Token_write;
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 880 "lexer.l"
+#line 894 "lexer.l"
 return Token_add;
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 881 "lexer.l"
+#line 895 "lexer.l"
 return Token_sub;
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 882 "lexer.l"
+#line 896 "lexer.l"
 return Token_mult;
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 883 "lexer.l"
+#line 897 "lexer.l"
 return Token_divide;
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 884 "lexer.l"
+#line 898 "lexer.l"
 return Token_less;
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 885 "lexer.l"
+#line 899 "lexer.l"
 return Token_bigger;
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 886 "lexer.l"
+#line 900 "lexer.l"
 return Token_eq;
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 887 "lexer.l"
+#line 901 "lexer.l"
 return Token_comma;
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 888 "lexer.l"
+#line 902 "lexer.l"
 return Token_semicolon;
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 889 "lexer.l"
+#line 903 "lexer.l"
 return Token_colon;
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 890 "lexer.l"
+#line 904 "lexer.l"
 return Token_dot;
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 891 "lexer.l"
+#line 905 "lexer.l"
 return Token_lRectBracket;
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 892 "lexer.l"
+#line 906 "lexer.l"
 return Token_rRectBracket;
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 893 "lexer.l"
+#line 907 "lexer.l"
 return Token_lBracket;
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 894 "lexer.l"
+#line 908 "lexer.l"
 return Token_rBracket;
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 895 "lexer.l"
+#line 909 "lexer.l"
 return Token_identifier;
 	YY_BREAK
 case YY_STATE_EOF(INITIAL):
-#line 896 "lexer.l"
+#line 910 "lexer.l"
 return Token_EOF;
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
-#line 898 "lexer.l"
+#line 912 "lexer.l"
 { yyerror(yytext); return Token_error; }
 	YY_BREAK
 case 57:
 YY_RULE_SETUP
-#line 900 "lexer.l"
+#line 914 "lexer.l"
 ECHO;
 	YY_BREAK
-#line 1937 "lex.yy.c"
+#line 1951 "lex.yy.c"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -2929,7 +2943,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 900 "lexer.l"
+#line 914 "lexer.l"
 
 
 
