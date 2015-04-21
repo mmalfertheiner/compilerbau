@@ -175,37 +175,169 @@ Follow(IdentList) =
 */
 #define First_IdentList First_VarDecList
 enum Token Follow_IdentList[] = { Token_colon };
-struct FirstFollow IdentList_FirstFollow = { &First_IdentList[0], &Follow_IdentList[0], 1, 1 };
+struct FirstFollow IdentList_FirstFollow = { &First_IdentList[0], &Follow_IdentList[0], 1, 0 };
 
 
-
-
-
-
+/*
+First(Type) = Follow(identList) = {:}
+Follow(Type) = Follow(IdentListType) = { ; , BEGIN }
+*/
 enum Token First_Type[] = { Token_array, Token_integer, Token_real, Token_string };
+#define Follow_Type Follow_IdentListType
+struct FirstFollow Type_FirstFollow = { &First_Type[0], &Follow_Type[0], 4, 2 };
+
+
+/*
+First(SimpleType) = 
+Follow(SimpleType) = Follow(Type) = { ; , BEGIN}
+*/
 enum Token First_SimpleType[] = { Token_integer, Token_real, Token_string };
-enum Token First_CompStmt[] = { Token_begin };
+#define Follow_SimpleType Follow_Type
+struct FirstFollow SimpleType_FirstFollow = { &First_SimpleType[0], &Follow_SimpleType[0], 3, 2 };
+
+/*
+First(StmtList) = 
+Follow(StmtList) = {END}
+*/
 enum Token First_StmtList[] = { Token_begin, Token_read, Token_write, Token_identifier, Token_if, Token_while, Token_for};
-#define First_Statement = First_StmtList
+enum Token Follow_StmtList[] = { Token_end };
+struct FirstFollow StmtList_FirstFollow = { &First_StmtList[0], &Follow_StmtList[0], 7,  1};
+
+/*
+First(Statement) = 
+Follow(Statement) += ELSE = { ; , END, ELSE}
+*/
+#define First_Statement First_StmtList
+enum Token Follow_Statement[] = { Token_semicolon, Token_end, Token_else };
+struct FirstFollow Statement_FirstFollow = { &First_Statement[0], &Follow_Statement[0], 7, 3 };
+
+/*
+First(CompStmt) = 
+Follow(CompStmt) = Follow(Statement) = { ; , END}
+*/
+enum Token First_CompStmt[] = { Token_begin };
+#define Follow_CompStmt Follow_Statement
+struct FirstFollow CompStmt_FirstFollow = { &First_CompStmt[0], &Follow_CompStmt[0], 1, 3 };
+
+
+/*
+First(AssignStmt) = 
+Follow(AssignStmt) = Follow(Statement) = { ; , END}
+*/
 enum Token First_AssignStmt[] = { Token_identifier };
+#define Follow_AssignStmt Follow_Statement
+struct FirstFollow AssignStmt_FirstFollow = { &First_AssignStmt[0], &Follow_AssignStmt[0], 1, 3 };
+
+/*
+First(Index) = 
+Follow(Index) += ] = { :, ] }
+*/
 enum Token First_Index[] = { Token_lBracket };
+enum Token Follow_Index[] = { Token_colon, Token_rRectBracket };
+struct FirstFollow Index_FirstFollow = { &First_Index[0], &Follow_Index[0], 1,  2};
+
+
+/*
+First(IfStmt) = 
+Follow(IfStmt) = 
+*/
 enum Token First_IfStmt[] = { Token_if };
+#define Follow_IfStmt Follow_Statement
+struct FirstFollow IfStmt_FirstFollow = { &First_IfStmt[0], &Follow_IfStmt[0], 1, 3 };
+
+
+/*
+First(WhileStmt) = 
+Follow(WhileStmt) = 
+*/
 enum Token First_WhileStmt[] = { Token_while };
+#define Follow_WhileStmt Follow_Statement
+struct FirstFollow WhileStmt_FirstFollow = { &First_WhileStmt[0], &Follow_WhileStmt[0], 1, 3 };
+
+/*
+First(ForStmt) = 
+Follow(ForStmt) = 
+*/
 enum Token First_ForStmt[] = { Token_for };
+#define Follow_ForStmt Follow_Statement
+struct FirstFollow ForStmt_FirstFollow = { &First_ForStmt[0], &Follow_ForStmt[0], 1, 3 };
+
+/*
+First(ToPart) = 
+Follow(ToPart) = 
+*/
 enum Token First_ToPart[] = { Token_to, Token_downTo };
+enum Token Follow_ToPart[] = {  };
+struct FirstFollow ToPart_FirstFollow = { &First_ToPart[0], &Follow_ToPart[0], 2, 0 };
+
+
+/*
+First(ExprList) = 
+Follow(ExprList) = { ) }
+*/
 enum Token First_ExprList[] = { Token_Integer, Token_Real, Token_String, Token_true, Token_false, Token_identifier, Token_not, Token_sub, Token_lBracket };
-#define First_Expr = First_ExprList
-#define First_SimpleExpr = First_Expr
-#define First_Term = First_SimpleExpr
-#define First_Factor = First_Term
+enum Token Follow_ExprList[] = { Token_rBracket };
+struct FirstFollow ExprList_FirstFollow = { &First_ExprList[0], &Follow_ExprList[0], 9, 1 };
+
+
+/*
+First(Expr) = 
+Follow(Expr) = { ELSE, ; , END, THEN, DO, TO, DOWNTO, ',', ) }
+*/
+#define First_Expr First_ExprList
+enum Token Follow_Expr[] = { Token_else, Token_semicolon, Token_end, Token_then, Token_do, Token_to, Token_downTo, Token_comma, Token_rBracket };
+struct FirstFollow Expr_FirstFollow = { &First_Expr[0], &Follow_Expr[0], 9, 9 };
+
+
+/*
+First(SimpleExpr) = 
+Follow(SimpleExpr) = {. , ], <, <=, >, >=, =, <>, ;, END, THEN, DO, TO, DOWNTO, ',', ) }
+*/
+#define First_SimpleExpr First_Expr
+enum Token Follow_SimpleExpr[] = { Token_dot, Token_rRectBracket, Token_less, Token_leq, Token_bigger, Token_beq, Token_assign, Token_noteq, Token_semicolon, Token_end, Token_then, Token_do, Token_to, Token_downTo, Token_comma, Token_rBracket };
+struct FirstFollow SimpleExpr_FirstFollow = { &First_SimpleExpr[0], &Follow_SimpleExpr[0], 9, 16};
+
+/*
+First(Term) = 
+Follow(Term) = { +, -, OR, . , ], <, <=, >, >=, =, <>, ;, END, THEN, DO, TO, DOWNTO, ',', ) }
+*/
+#define First_Term First_SimpleExpr
+enum Token Follow_Term[] = { Token_add, Token_sub, Token_or, 
+Token_dot, Token_rRectBracket, Token_less, Token_leq, Token_bigger, Token_beq, Token_assign, Token_noteq, Token_semicolon, Token_end, Token_then, Token_do, Token_to, Token_downTo, Token_comma, Token_rBracket };
+struct FirstFollow Term_FirstFollow = { &First_Term[0], &Follow_Term[0], 9, 19 };
+
+/*
+First(Factor) = 
+Follow(Factor) += Follow(term) = {*, /, DIV, MOD, AND, +, -, OR, . , ], <, <=, >, >=, =, <>, ;, END, THEN, DO, TO, DOWNTO, ',', ) }
+*/
+#define First_Factor First_Term
+enum Token Follow_Factor[] = { Token_mult, Token_divide, Token_mod, Token_and, Token_add, Token_sub, Token_or, 
+Token_dot, Token_rRectBracket, Token_less, Token_leq, Token_bigger, Token_beq, Token_assign, Token_noteq, Token_semicolon, Token_end, Token_then, Token_do, Token_to, Token_downTo, Token_comma, Token_rBracket };
+struct FirstFollow Factor_FirstFollow = { &First_Factor[0], &Follow_Factor[0], 9, 23 };
+
+/*
+First(RelOp) = 
+Follow(RelOp) = { }
+*/
 enum Token First_RelOp[] = { Token_less, Token_leq, Token_bigger, Token_beq, Token_eq, Token_noteq};
+enum Token Follow_RelOp[] = {  };
+struct FirstFollow RelOp_FirstFollow = { &First_RelOp[0], &Follow_RelOp[0], 6, 0 };
+
+/*
+First(AddOp) = 
+Follow(AddOp) = 
+*/
 enum Token First_AddOp[] = { Token_add, Token_sub, Token_or };
+enum Token Follow_AddOp[] = {  };
+struct FirstFollow AddOp_FirstFollow = { &First_AddOp[0], &Follow_AddOp[0], 3, 0 };
+
+/*
+First(MulOp) = 
+Follow(MulOp) = { }
+*/
 enum Token First_MulOp[] = { Token_mult, Token_div, Token_divide, Token_mod, Token_and };
-
-
-
-
-
+enum Token Follow_MulOp[] = {  };
+struct FirstFollow MulOp_FirstFollow = { &First_MulOp[0], &Follow_MulOp[0], 5, 0 };
 
 
 enum Token currentToken;
