@@ -46,7 +46,6 @@ typedef int16_t flex_int16_t;
 typedef uint16_t flex_uint16_t;
 typedef int32_t flex_int32_t;
 typedef uint32_t flex_uint32_t;
-typedef uint64_t flex_uint64_t;
 #else
 typedef signed char flex_int8_t;
 typedef short int flex_int16_t;
@@ -54,7 +53,6 @@ typedef int flex_int32_t;
 typedef unsigned char flex_uint8_t; 
 typedef unsigned short int flex_uint16_t;
 typedef unsigned int flex_uint32_t;
-#endif /* ! C99 */
 
 /* Limits of integral types. */
 #ifndef INT8_MIN
@@ -84,6 +82,8 @@ typedef unsigned int flex_uint32_t;
 #ifndef UINT32_MAX
 #define UINT32_MAX             (4294967295U)
 #endif
+
+#endif /* ! C99 */
 
 #endif /* ! FLEXINT_H */
 
@@ -141,7 +141,15 @@ typedef unsigned int flex_uint32_t;
 
 /* Size of default input buffer. */
 #ifndef YY_BUF_SIZE
+#ifdef __ia64__
+/* On IA-64, the buffer size is 16k, not 8k.
+ * Moreover, YY_BUF_SIZE is 2*YY_READ_BUF_SIZE in the general case.
+ * Ditto for the __ia64__ case accordingly.
+ */
+#define YY_BUF_SIZE 32768
+#else
 #define YY_BUF_SIZE 16384
+#endif /* __ia64__ */
 #endif
 
 /* The state buf must be large enough to hold one state per character in the main buffer.
@@ -153,12 +161,7 @@ typedef unsigned int flex_uint32_t;
 typedef struct yy_buffer_state *YY_BUFFER_STATE;
 #endif
 
-#ifndef YY_TYPEDEF_YY_SIZE_T
-#define YY_TYPEDEF_YY_SIZE_T
-typedef size_t yy_size_t;
-#endif
-
-extern yy_size_t yyleng;
+extern int yyleng;
 
 extern FILE *yyin, *yyout;
 
@@ -184,6 +187,11 @@ extern FILE *yyin, *yyout;
 
 #define unput(c) yyunput( c, (yytext_ptr)  )
 
+#ifndef YY_TYPEDEF_YY_SIZE_T
+#define YY_TYPEDEF_YY_SIZE_T
+typedef size_t yy_size_t;
+#endif
+
 #ifndef YY_STRUCT_YY_BUFFER_STATE
 #define YY_STRUCT_YY_BUFFER_STATE
 struct yy_buffer_state
@@ -201,7 +209,7 @@ struct yy_buffer_state
 	/* Number of characters read into yy_ch_buf, not including EOB
 	 * characters.
 	 */
-	yy_size_t yy_n_chars;
+	int yy_n_chars;
 
 	/* Whether we "own" the buffer - i.e., we know we created it,
 	 * and can realloc() it to grow it, and should free() it to
@@ -271,8 +279,8 @@ static YY_BUFFER_STATE * yy_buffer_stack = 0; /**< Stack as an array. */
 
 /* yy_hold_char holds the character lost when yytext is formed. */
 static char yy_hold_char;
-static yy_size_t yy_n_chars;		/* number of characters read into yy_ch_buf */
-yy_size_t yyleng;
+static int yy_n_chars;		/* number of characters read into yy_ch_buf */
+int yyleng;
 
 /* Points to current character in buffer. */
 static char *yy_c_buf_p = (char *) 0;
@@ -300,7 +308,7 @@ static void yy_init_buffer (YY_BUFFER_STATE b,FILE *file  );
 
 YY_BUFFER_STATE yy_scan_buffer (char *base,yy_size_t size  );
 YY_BUFFER_STATE yy_scan_string (yyconst char *yy_str  );
-YY_BUFFER_STATE yy_scan_bytes (yyconst char *bytes,yy_size_t len  );
+YY_BUFFER_STATE yy_scan_bytes (yyconst char *bytes,int len  );
 
 void *yyalloc (yy_size_t  );
 void *yyrealloc (void *,yy_size_t  );
@@ -358,7 +366,7 @@ static void yy_fatal_error (yyconst char msg[]  );
  */
 #define YY_DO_BEFORE_ACTION \
 	(yytext_ptr) = yy_bp; \
-	yyleng = (yy_size_t) (yy_cp - yy_bp); \
+	yyleng = (size_t) (yy_cp - yy_bp); \
 	(yy_hold_char) = *yy_cp; \
 	*yy_cp = '\0'; \
 	(yy_c_buf_p) = yy_cp;
@@ -544,6 +552,7 @@ char *yytext;
 #line 2 "lexer.l"
 #include <stdio.h>
 #include <string.h>
+#include "sets.h"
 
 void yyerror(char* s);
 void compStmt();
@@ -561,7 +570,6 @@ void addOp();
 void mulOp();
 void arrayIndex();
 
-
 enum Token {
 	Token_add, 
 	Token_and, 
@@ -577,8 +585,10 @@ enum Token {
 	Token_do, 
 	Token_dot,
 	Token_downTo, 
-	Token_else, 
-	Token_end, 
+	Token_else,
+	Token_epsilon, 
+	Token_end,
+	Token_EOF, 
 	Token_eq, 
 	Token_error,
 	Token_false, 
@@ -632,8 +642,10 @@ static char *TOKEN_STRING[] = {
 	"Token_do", 
 	"Token_dot",
 	"Token_downTo", 
-	"Token_else", 
+	"Token_else",
+	"Token_epsilon", 
 	"Token_end", 
+	"Token_EOF",
 	"Token_eq", 
 	"Token_error",
 	"Token_false", 
@@ -672,6 +684,81 @@ static char *TOKEN_STRING[] = {
 	"Token_write",
 };
 
+struct FirstFollow
+{
+	enum Token *First;
+	enum Token *Follow;
+	int size_first;
+	int size_follow; 
+};
+
+
+
+// define list of FirstSets
+/*
+First(start) = {PROGRAM}
+Follow(Start) = {$}
+*/
+enum Token First_Start[] = { Token_program };
+enum Token Follow_Start[] = { Token_EOF };
+struct FirstFollow Start_FirstFollow = { &First_Start[0], &Follow_Start[0], 1, 1 };
+
+/*
+First(VarDecList) = First(IdenListType) = { IDENT }
+Follow(VarDecList) = { BEGIN }
+*/
+enum Token First_VarDecList[] = { Token_identifier };
+enum Token Follow_VarDecList[] = { Token_begin };
+struct FirstFollow VarDecList_FirstFollow = { &First_VarDecList[0], &Follow_VarDecList[0], 1, 2 };
+
+/*
+First(IdenListType) = First(IdentList) = { IDENT }
+Follow(identListType) += Follow(VarDecList) = { ; , BEGIN }
+*/
+#define First_IdentListType First_VarDecList
+enum Token Follow_IdentListType[] = { Token_semicolon, Token_begin };
+struct FirstFollow IdentListType_FirstFollow = { &First_IdentListType[0], &Follow_IdentListType[0], 1, 2 };
+
+
+/*
+First(IdentList) = 
+Follow(IdentList) = 
+*/
+#define First_IdentList First_VarDecList
+enum Token Follow_IdentList[] = { Token_colon };
+struct FirstFollow IdentList_FirstFollow = { &First_IdentList[0], &Follow_IdentList[0], 1, 1 };
+
+
+
+
+
+
+enum Token First_Type[] = { Token_array, Token_integer, Token_real, Token_string };
+enum Token First_SimpleType[] = { Token_integer, Token_real, Token_string };
+enum Token First_CompStmt[] = { Token_begin };
+enum Token First_StmtList[] = { Token_begin, Token_read, Token_write, Token_identifier, Token_if, Token_while, Token_for};
+#define First_Statement = First_StmtList
+enum Token First_AssignStmt[] = { Token_identifier };
+enum Token First_Index[] = { Token_lBracket };
+enum Token First_IfStmt[] = { Token_if };
+enum Token First_WhileStmt[] = { Token_while };
+enum Token First_ForStmt[] = { Token_for };
+enum Token First_ToPart[] = { Token_to, Token_downTo };
+enum Token First_ExprList[] = { Token_Integer, Token_Real, Token_String, Token_true, Token_false, Token_identifier, Token_not, Token_sub, Token_lBracket };
+#define First_Expr = First_ExprList
+#define First_SimpleExpr = First_Expr
+#define First_Term = First_SimpleExpr
+#define First_Factor = First_Term
+enum Token First_RelOp[] = { Token_less, Token_leq, Token_bigger, Token_beq, Token_eq, Token_noteq};
+enum Token First_AddOp[] = { Token_add, Token_sub, Token_or };
+enum Token First_MulOp[] = { Token_mult, Token_div, Token_divide, Token_mod, Token_and };
+
+
+
+
+
+
+
 enum Token currentToken;
 int errorMessage = 0;
 
@@ -681,7 +768,7 @@ void match(enum Token type){
 		char tmp[100];
 		strcpy(tmp, yytext);
 		currentToken = yylex();
-		printf("%s ------next Token------> %s\n", tmp, yytext);
+		//printf("%s ------next Token------> %s\n", tmp, yytext);
 	} 
 	else 
 	{
@@ -691,11 +778,54 @@ void match(enum Token type){
 
 }
 
+
+int isElementfollower(struct FirstFollow sets, enum Token currentToken){
+	int i;
+	for(i=0;i<sets.size_follow;i++){
+		printf("%s\n", TOKEN_STRING[sets.Follow[i]]);
+		if(sets.Follow[i]==currentToken || sets.Follow[i]==Token_epsilon){
+			return 1;
+		}
+	}
+	return 0;
+}
+
+
+int isElementfirst(struct FirstFollow sets, enum Token currentToken){
+	int i;
+	for(i=0;i<sets.size_first;i++){
+		if(sets.First[i]==currentToken || sets.First[i]==Token_epsilon){
+			return 1;
+    	}
+	}
+    return 0;
+}
+
+void scanto(struct FirstFollow sets){
+ 	do{
+     	char tmp[100];
+        strcpy(tmp, yytext);
+		currentToken=yylex();
+		printf("%s--->%s   \n",tmp ,yytext);
+  	} while (
+  		!isElementfollower(sets,currentToken) 
+  		&& currentToken != Token_EOF
+  	);
+}
+
+void checkFirstFollow(struct FirstFollow sets){
+    if(!isElementfirst(sets,currentToken)){
+		printf("\tError %s \n", yytext);
+		scanto(sets);
+    }
+}
+
+
 /*
 	mulOp 			→ * | / | DIV | MOD | AND
 */
 void mulOp(){
-	printf("%d: addOp\n", yylineno);
+	//printf("%d: addOp\n", yylineno);
 	match(currentToken);
 }
 
@@ -704,7 +834,7 @@ void mulOp(){
 	addOp			→ + | – | OR
 */
 void addOp(){
-	printf("%d: addOp\n", yylineno);
+	//printf("%d: addOp\n", yylineno);
 	match(currentToken);
 }
 
@@ -712,7 +842,7 @@ void addOp(){
 	relOp 			→ < | <= | > | >= | = | <>
 */
 void relOp(){
-	printf("%d: relOp\n", yylineno);
+	//printf("%d: relOp\n", yylineno);
 	match(currentToken);
 }
 
@@ -722,7 +852,7 @@ void relOp(){
 					| ε
 */
 void exprList(){
-	printf("%d: exprList\n", yylineno);
+	//printf("%d: exprList\n", yylineno);
 	expr();
 	while (errorMessage == 0 && currentToken == Token_comma){
 		match(Token_comma);
@@ -736,7 +866,7 @@ void exprList(){
 					| ε
 */
 void expr(){
-	printf("%d: expr\n", yylineno);
+	//printf("%d: expr\n", yylineno);
 	simpleExpr();
 	while (errorMessage == 0 && (currentToken == Token_less || currentToken == Token_leq || currentToken == Token_bigger || currentToken == Token_beq || currentToken == Token_eq || currentToken == Token_noteq)){
 		relOp();
@@ -750,7 +880,7 @@ simpleExpr' 	→ addOp term simpleExpr'
 				| ε
 */
 void simpleExpr(){
-	printf("%d: simpleExpr\n", yylineno);
+	//printf("%d: simpleExpr\n", yylineno);
 	term();
 	while(errorMessage == 0 && (currentToken == Token_add || currentToken == Token_sub || currentToken == Token_or)){
 		addOp();
@@ -764,7 +894,7 @@ void simpleExpr(){
 					| ε
 */
 void term(){
-	printf("%d: term\n", yylineno);
+	//printf("%d: term\n", yylineno);
 	factor();
 	while(errorMessage == 0 && (currentToken == Token_mult || currentToken == Token_divide || currentToken == Token_div || currentToken == Token_mod || currentToken == Token_and)){
 		mulOp();
@@ -785,7 +915,7 @@ void term(){
 				| ε
 */
 void factor(){
-	printf("%d: factor\n", yylineno);
+	//printf("%d: factor\n", yylineno);
 	switch(currentToken){
 		case Token_Integer:
 			match(Token_Integer);
@@ -805,7 +935,6 @@ void factor(){
 		case Token_identifier:
 			match(Token_identifier);
 			if(currentToken == Token_lRectBracket) {
-				printf("%s\n\n\n", "In here");
 				arrayIndex();
 			}
 			break;
@@ -833,7 +962,7 @@ index'			→ ]
 				| .. simpleExpr ]
 */
 void arrayIndex(){
-	printf("%d: index\n", yylineno);
+	//printf("%d: index\n", yylineno);
 	match(Token_lRectBracket);
 	simpleExpr();
 	if(currentToken == Token_dot){
@@ -851,7 +980,7 @@ void arrayIndex(){
 					| index := expr
 */
 void assignStmt(){
-	printf("%d: assignStmt\n", yylineno);
+	//printf("%d: assignStmt\n", yylineno);
 	match(Token_identifier);
 	if(currentToken == Token_lRectBracket){
 		arrayIndex();
@@ -867,7 +996,7 @@ void assignStmt(){
 					| ε
 */
 void ifStmt(){
-	printf("%d: ifStmt\n", yylineno);
+	//printf("%d: ifStmt\n", yylineno);
 	match(Token_if);
 	expr();
 	match(Token_then);
@@ -878,7 +1007,7 @@ void ifStmt(){
 }
 
 void elsePart(){
-	printf("%d: elsePart\n", yylineno);
+	//printf("%d: elsePart\n", yylineno);
 	match(Token_else);
 	statement();
 }
@@ -888,7 +1017,7 @@ void elsePart(){
 */
 
 void whileStmt(){
-	printf("%d: whileStmt\n", yylineno);
+	//printf("%d: whileStmt\n", yylineno);
 	match(Token_while);
 	expr();
 	match(Token_do);
@@ -901,7 +1030,7 @@ void whileStmt(){
 */
 
 void forStmt(){
-	printf("%d: forStmt\n", yylineno);
+	//printf("%d: forStmt\n", yylineno);
 	match(Token_for);
 	match(Token_identifier);
 	match(Token_assign);
@@ -913,7 +1042,7 @@ void forStmt(){
 }
 
 void toPart(){
-	printf("%d: forStmt\n", yylineno);
+	//printf("%d: forStmt\n", yylineno);
 	switch(currentToken){
 		case Token_to:
 			match(Token_to);
@@ -936,7 +1065,7 @@ void toPart(){
                     | WRITE ( exprList )
 */
 void statement(){
-	printf("%d: statement\n", yylineno);
+	//printf("%d: statement\n", yylineno);
 	switch(currentToken){
 		case Token_identifier:
 			assignStmt();
@@ -976,7 +1105,7 @@ void statement(){
 					| ε
 */
 void stmtList(){
-	printf("%d: stmtList\n", yylineno);
+	//printf("%d: stmtList\n", yylineno);
 	statement();
 	while (errorMessage == 0 && currentToken == Token_semicolon){
 		match(Token_semicolon);
@@ -989,7 +1118,7 @@ void stmtList(){
 	compStmt 		→ BEGIN stmtList END
 */
 void compStmt(){
-	printf("%d: compStmt\n", yylineno);
+	//printf("%d: compStmt\n", yylineno);
 	match(Token_begin);
 	stmtList();
 	match(Token_end);
@@ -1000,7 +1129,8 @@ void compStmt(){
 					| IDENT
 */
 void identList(){
-	printf("%d: identList\n", yylineno);
+	//printf("%d: identList\n", yylineno);
+	checkFirstFollow(IdentList_FirstFollow);
 	match(Token_identifier);
 	while (errorMessage == 0 && currentToken == Token_comma){
 		match(Token_comma);
@@ -1009,7 +1139,7 @@ void identList(){
 }
 
 void simpleType(){
-	printf("%d: simpleType\n", yylineno);
+	//printf("%d: simpleType\n", yylineno);
 	switch(currentToken){
 		case Token_real:
 			match(Token_real);
@@ -1030,7 +1160,7 @@ void simpleType(){
 				| ARRAY [ NUM .. NUM ] OF simpleType
 */
 void type(){
-	printf("%d: type\n", yylineno);
+	//printf("%d: type\n", yylineno);
 	switch(currentToken){
 		case Token_array:
 			match(Token_array);
@@ -1052,11 +1182,12 @@ void type(){
 	identListType 	→ identList : type	
 */
 void identListType(){
-	printf("%d: identListType\n", yylineno);
+	//printf("%d: identListType\n", yylineno);
+	checkFirstFollow(IdentListType_FirstFollow);
 	identList();
 	match(Token_colon);
 	type();
-	printf("%d: End identListType\n", yylineno);
+	//printf("%d: End identListType\n", yylineno);
 }
 
 
@@ -1066,7 +1197,8 @@ void identListType(){
 					|ε
 */
 void varDecList(){
-	printf("%d: varDecList\n", yylineno);
+	//printf("%d: varDecList\n", yylineno);
+	checkFirstFollow(VarDecList_FirstFollow);
 	identListType();
 	while (errorMessage == 0 && currentToken == Token_semicolon){
 		match(Token_semicolon);
@@ -1074,7 +1206,7 @@ void varDecList(){
 			identListType();
 	}
 	
-	printf("%d: End varDecList\n", yylineno);
+	//printf("%d: End varDecList\n", yylineno);
 }
 
 /*
@@ -1082,10 +1214,10 @@ void varDecList(){
 					| ε
 */
 void varDec(){
-	printf("%d: varDec\n", yylineno);
+	//printf("%d: varDec\n", yylineno);
 	match(Token_var);
 	varDecList();
-	printf("%d: End varDec\n", yylineno);	
+	//printf("%d: End varDec\n", yylineno);	
 }
 
 /*
@@ -1093,18 +1225,18 @@ void varDec(){
 */
 void start() {
 	currentToken = yylex();
-
-	printf("%d: start\n", yylineno);
+	checkFirstFollow(Start_FirstFollow);
+	//printf("%d: start\n", yylineno);
 	match(Token_program);
 	match(Token_identifier);
 	match(Token_semicolon);
 	varDec();
 	compStmt();
 	match(Token_dot);
-	printf("%d: End of start\n", yylineno);
+	//printf("%d: End of start\n", yylineno);
 }
 
-#line 1108 "lex.yy.c"
+#line 1240 "lex.yy.c"
 
 #define INITIAL 0
 
@@ -1143,7 +1275,7 @@ FILE *yyget_out (void );
 
 void yyset_out  (FILE * out_str  );
 
-yy_size_t yyget_leng (void );
+int yyget_leng (void );
 
 char *yyget_text (void );
 
@@ -1185,7 +1317,12 @@ static int input (void );
 
 /* Amount of stuff to slurp up with each read. */
 #ifndef YY_READ_BUF_SIZE
+#ifdef __ia64__
+/* On IA-64, the buffer size is 16k, not 8k */
+#define YY_READ_BUF_SIZE 16384
+#else
 #define YY_READ_BUF_SIZE 8192
+#endif /* __ia64__ */
 #endif
 
 /* Copy whatever the last rule matched to the standard output. */
@@ -1193,7 +1330,7 @@ static int input (void );
 /* This used to be an fputs(), but since the string might contain NUL's,
  * we now use fwrite().
  */
-#define ECHO fwrite( yytext, yyleng, 1, yyout )
+#define ECHO do { if (fwrite( yytext, yyleng, 1, yyout )) {} } while (0)
 #endif
 
 /* Gets input and stuffs it into "buf".  number of characters read, or YY_NULL,
@@ -1204,7 +1341,7 @@ static int input (void );
 	if ( YY_CURRENT_BUFFER_LVALUE->yy_is_interactive ) \
 		{ \
 		int c = '*'; \
-		yy_size_t n; \
+		size_t n; \
 		for ( n = 0; n < max_size && \
 			     (c = getc( yyin )) != EOF && c != '\n'; ++n ) \
 			buf[n] = (char) c; \
@@ -1286,10 +1423,10 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
     
-#line 582 "lexer.l"
+#line 706 "lexer.l"
 
 
-#line 1293 "lex.yy.c"
+#line 1430 "lex.yy.c"
 
 	if ( !(yy_init) )
 		{
@@ -1375,294 +1512,296 @@ do_action:	/* This label is used only to access EOF actions. */
 case 1:
 /* rule 1 can match eol */
 YY_RULE_SETUP
-#line 584 "lexer.l"
+#line 708 "lexer.l"
 { yylineno++; }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 585 "lexer.l"
+#line 709 "lexer.l"
 
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 586 "lexer.l"
+#line 710 "lexer.l"
 
 	YY_BREAK
 case 4:
 /* rule 4 can match eol */
 YY_RULE_SETUP
-#line 587 "lexer.l"
+#line 711 "lexer.l"
 { yylineno++; }
 	YY_BREAK
 case 5:
 /* rule 5 can match eol */
 YY_RULE_SETUP
-#line 588 "lexer.l"
+#line 712 "lexer.l"
 return Token_String;
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 589 "lexer.l"
+#line 713 "lexer.l"
 return Token_Integer;
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 590 "lexer.l"
+#line 714 "lexer.l"
 return Token_Real;
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 592 "lexer.l"
+#line 716 "lexer.l"
 return Token_integer;
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 593 "lexer.l"
+#line 717 "lexer.l"
 return Token_real;
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 594 "lexer.l"
+#line 718 "lexer.l"
 return Token_string;
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 595 "lexer.l"
+#line 719 "lexer.l"
 return Token_assign;
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 596 "lexer.l"
+#line 720 "lexer.l"
 return Token_leq;
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 597 "lexer.l"
+#line 721 "lexer.l"
 return Token_noteq;
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 598 "lexer.l"
+#line 722 "lexer.l"
 return Token_beq;		
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 599 "lexer.l"
+#line 723 "lexer.l"
 return Token_and;
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 600 "lexer.l"
+#line 724 "lexer.l"
 return Token_array;
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 601 "lexer.l"
+#line 725 "lexer.l"
 return Token_begin;
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 602 "lexer.l"
+#line 726 "lexer.l"
 return Token_div;
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 603 "lexer.l"
+#line 727 "lexer.l"
 return Token_do;
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 604 "lexer.l"
+#line 728 "lexer.l"
 return Token_downTo;
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 605 "lexer.l"
+#line 729 "lexer.l"
 return Token_else;
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 606 "lexer.l"
+#line 730 "lexer.l"
 return Token_end;
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 607 "lexer.l"
+#line 731 "lexer.l"
 return Token_false;
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 608 "lexer.l"
+#line 732 "lexer.l"
 return Token_for;
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 609 "lexer.l"
+#line 733 "lexer.l"
 return Token_if;
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 610 "lexer.l"
+#line 734 "lexer.l"
 return Token_repeat;
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 611 "lexer.l"
+#line 735 "lexer.l"
 return Token_until;
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 612 "lexer.l"
+#line 736 "lexer.l"
 return Token_mod;
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 613 "lexer.l"
+#line 737 "lexer.l"
 return Token_not;
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 614 "lexer.l"
+#line 738 "lexer.l"
 return Token_of;
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 615 "lexer.l"
+#line 739 "lexer.l"
 return Token_or;
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 616 "lexer.l"
+#line 740 "lexer.l"
 return Token_program;
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 617 "lexer.l"
+#line 741 "lexer.l"
 return Token_read;
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 618 "lexer.l"
+#line 742 "lexer.l"
 return Token_then;
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 619 "lexer.l"
+#line 743 "lexer.l"
 return Token_to;
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 620 "lexer.l"
+#line 744 "lexer.l"
 return Token_true;
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 621 "lexer.l"
+#line 745 "lexer.l"
 return Token_var;
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 622 "lexer.l"
+#line 746 "lexer.l"
 return Token_while;
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 623 "lexer.l"
+#line 747 "lexer.l"
 return Token_write;
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 624 "lexer.l"
+#line 748 "lexer.l"
 return Token_add;
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 625 "lexer.l"
+#line 749 "lexer.l"
 return Token_sub;
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 626 "lexer.l"
+#line 750 "lexer.l"
 return Token_mult;
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 627 "lexer.l"
+#line 751 "lexer.l"
 return Token_divide;
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 628 "lexer.l"
+#line 752 "lexer.l"
 return Token_less;
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 629 "lexer.l"
+#line 753 "lexer.l"
 return Token_bigger;
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 630 "lexer.l"
+#line 754 "lexer.l"
 return Token_eq;
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 631 "lexer.l"
+#line 755 "lexer.l"
 return Token_comma;
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 632 "lexer.l"
+#line 756 "lexer.l"
 return Token_semicolon;
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 633 "lexer.l"
+#line 757 "lexer.l"
 return Token_colon;
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 634 "lexer.l"
+#line 758 "lexer.l"
 return Token_dot;
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 635 "lexer.l"
+#line 759 "lexer.l"
 return Token_lRectBracket;
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 636 "lexer.l"
+#line 760 "lexer.l"
 return Token_rRectBracket;
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 637 "lexer.l"
+#line 761 "lexer.l"
 return Token_lBracket;
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 638 "lexer.l"
+#line 762 "lexer.l"
 return Token_rBracket;
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 639 "lexer.l"
+#line 763 "lexer.l"
 return Token_identifier;
+	YY_BREAK
+case YY_STATE_EOF(INITIAL):
+#line 764 "lexer.l"
+return Token_EOF;
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
-#line 642 "lexer.l"
+#line 766 "lexer.l"
 { yyerror(yytext); return Token_error; }
 	YY_BREAK
 case 57:
 YY_RULE_SETUP
-#line 644 "lexer.l"
+#line 768 "lexer.l"
 ECHO;
 	YY_BREAK
-#line 1664 "lex.yy.c"
-case YY_STATE_EOF(INITIAL):
-	yyterminate();
+#line 1805 "lex.yy.c"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -1846,7 +1985,7 @@ static int yy_get_next_buffer (void)
 
 	else
 		{
-			yy_size_t num_to_read =
+			int num_to_read =
 			YY_CURRENT_BUFFER_LVALUE->yy_buf_size - number_to_move - 1;
 
 		while ( num_to_read <= 0 )
@@ -1860,7 +1999,7 @@ static int yy_get_next_buffer (void)
 
 			if ( b->yy_is_our_buffer )
 				{
-				yy_size_t new_size = b->yy_buf_size * 2;
+				int new_size = b->yy_buf_size * 2;
 
 				if ( new_size <= 0 )
 					b->yy_buf_size += b->yy_buf_size / 8;
@@ -1891,7 +2030,7 @@ static int yy_get_next_buffer (void)
 
 		/* Read in more data. */
 		YY_INPUT( (&YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[number_to_move]),
-			(yy_n_chars), num_to_read );
+			(yy_n_chars), (size_t) num_to_read );
 
 		YY_CURRENT_BUFFER_LVALUE->yy_n_chars = (yy_n_chars);
 		}
@@ -2001,7 +2140,7 @@ static int yy_get_next_buffer (void)
 	if ( yy_cp < YY_CURRENT_BUFFER_LVALUE->yy_ch_buf + 2 )
 		{ /* need to shift things up to make room */
 		/* +2 for EOB chars. */
-		register yy_size_t number_to_move = (yy_n_chars) + 2;
+		register int number_to_move = (yy_n_chars) + 2;
 		register char *dest = &YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[
 					YY_CURRENT_BUFFER_LVALUE->yy_buf_size + 2];
 		register char *source =
@@ -2050,7 +2189,7 @@ static int yy_get_next_buffer (void)
 
 		else
 			{ /* need more input */
-			yy_size_t offset = (yy_c_buf_p) - (yytext_ptr);
+			int offset = (yy_c_buf_p) - (yytext_ptr);
 			++(yy_c_buf_p);
 
 			switch ( yy_get_next_buffer(  ) )
@@ -2074,7 +2213,7 @@ static int yy_get_next_buffer (void)
 				case EOB_ACT_END_OF_FILE:
 					{
 					if ( yywrap( ) )
-						return 0;
+						return EOF;
 
 					if ( ! (yy_did_buffer_switch_on_eof) )
 						YY_NEW_FILE;
@@ -2326,7 +2465,7 @@ void yypop_buffer_state (void)
  */
 static void yyensure_buffer_stack (void)
 {
-	yy_size_t num_to_alloc;
+	int num_to_alloc;
     
 	if (!(yy_buffer_stack)) {
 
@@ -2418,16 +2557,17 @@ YY_BUFFER_STATE yy_scan_string (yyconst char * yystr )
 
 /** Setup the input buffer state to scan the given bytes. The next call to yylex() will
  * scan from a @e copy of @a bytes.
- * @param bytes the byte buffer to scan
- * @param len the number of bytes in the buffer pointed to by @a bytes.
+ * @param yybytes the byte buffer to scan
+ * @param _yybytes_len the number of bytes in the buffer pointed to by @a bytes.
  * 
  * @return the newly allocated buffer state object.
  */
-YY_BUFFER_STATE yy_scan_bytes  (yyconst char * yybytes, yy_size_t  _yybytes_len )
+YY_BUFFER_STATE yy_scan_bytes  (yyconst char * yybytes, int  _yybytes_len )
 {
 	YY_BUFFER_STATE b;
 	char *buf;
-	yy_size_t n, i;
+	yy_size_t n;
+	int i;
     
 	/* Get memory for full buffer, including space for trailing EOB's. */
 	n = _yybytes_len + 2;
@@ -2509,7 +2649,7 @@ FILE *yyget_out  (void)
 /** Get the length of the current token.
  * 
  */
-yy_size_t yyget_leng  (void)
+int yyget_leng  (void)
 {
         return yyleng;
 }
@@ -2657,7 +2797,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 644 "lexer.l"
+#line 768 "lexer.l"
 
 
 

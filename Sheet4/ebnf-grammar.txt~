@@ -2,7 +2,7 @@ start 			→ PROGRAM IDENT ; [ VAR varDecList ] compStmt .
 			
 varDecList 		→ identListType {; identListType}
 			
-identListType 		→ identList : type
+identListType 	→ identList : type
 
 identList 		→ IDENT {, IDENT}
 				
