@@ -377,10 +377,7 @@ void scanto(struct FirstFollow sets){
         strcpy(tmp, yytext);
 		currentToken=yylex();
 		printf("%s ---> %s CurrenToken: %s \n",tmp ,yytext, TOKEN_STRING[currentToken]);
-  	} while (
-  		!isElementfollower(sets,currentToken) 
-  		&& currentToken != Token_EOF
-  	);
+  	} while ( !isElementfollower(sets,currentToken) && currentToken != Token_EOF );
 }
 
 void checkFirstFollow(struct FirstFollow sets){

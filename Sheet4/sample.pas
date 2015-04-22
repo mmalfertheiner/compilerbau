@@ -18,7 +18,7 @@ program minipas;
 			else y := y - x
 		end;
 		if x = 0 then
-			write()
+			write(y)
 		else write(x);
 
 
