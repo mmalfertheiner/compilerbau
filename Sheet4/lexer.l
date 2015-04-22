@@ -138,7 +138,7 @@ struct FirstFollow
 	enum Token *First;
 	enum Token *Follow;
 	int size_first;
-	int size_follow; 
+	int size_follow;
 };
 
 
@@ -150,7 +150,7 @@ Follow(Start) = {$}
 */
 enum Token First_Start[] = { Token_program };
 enum Token Follow_Start[] = { Token_EOF };
-struct FirstFollow Start_FirstFollow = { &First_Start[0], &Follow_Start[0], 1, 1 };
+struct FirstFollow Start_FirstFollow = { &First_Start[0], &Follow_Start[0], 1, 1};
 
 /*
 First(VarDecList) = First(IdenListType) = { IDENT }
@@ -337,16 +337,15 @@ int errorMessage = 0;
 
 void match(enum Token type){
 	if (type == currentToken){
-		errorMessage = 0;
 		char tmp[100];
 		strcpy(tmp, yytext);
 		currentToken = yylex();
 		//printf("%s ------next Token------> %s\n", tmp, yytext);
 	}
-	//else 
-	//{
-	//	yyerror(TOKEN_STRING[currentToken]);
-	//}
+	else 
+	{
+		yyerror(TOKEN_STRING[currentToken]);
+	}
 }
 
 
@@ -372,17 +371,18 @@ int isElementfirst(struct FirstFollow sets, enum Token currentToken){
 }
 
 void scanto(struct FirstFollow sets){
- 	do{
-     	char tmp[100];
+ 	while ( !isElementfollower(sets,currentToken) && !isElementfirst(sets, currentToken) && currentToken != Token_EOF )
+    { 	
+    	char tmp[100];
         strcpy(tmp, yytext);
 		currentToken=yylex();
-		printf("%s ---> %s CurrenToken: %s \n",tmp ,yytext, TOKEN_STRING[currentToken]);
-  	} while ( !isElementfollower(sets,currentToken) && currentToken != Token_EOF );
+		printf("Skip %s and move on to %s CurrenToken: %s \n",tmp ,yytext, TOKEN_STRING[currentToken]);
+  	};
 }
 
 void checkFirstFollow(struct FirstFollow sets){
     if(!isElementfirst(sets,currentToken)){
-		yyerror(TOKEN_STRING[currentToken]);
+    	printf("%s not found in FirstSet\n", yytext);
 		scanto(sets);
     }
 }
@@ -391,7 +391,7 @@ void checkFirstFollow(struct FirstFollow sets){
 	mulOp 			→ * | / | DIV | MOD | AND
 */
 void mulOp(){
-	//printf("%d: addOp\n", yylineno);
+	printf("%d: addOp\n", yylineno);
 	checkFirstFollow(MulOp_FirstFollow);
 	match(currentToken);
 }
@@ -401,7 +401,7 @@ void mulOp(){
 	addOp			→ + | – | OR
 */
 void addOp(){
-	//printf("%d: addOp\n", yylineno);
+	printf("%d: addOp\n", yylineno);
 	checkFirstFollow(AddOp_FirstFollow);
 	match(currentToken);
 }
@@ -410,7 +410,7 @@ void addOp(){
 	relOp 			→ < | <= | > | >= | = | <>
 */
 void relOp(){
-	//printf("%d: relOp\n", yylineno);
+	printf("%d: relOp\n", yylineno);
 	checkFirstFollow(RelOp_FirstFollow);
 	match(currentToken);
 }
@@ -421,9 +421,10 @@ void relOp(){
 					| ε
 */
 void exprList(){
+	printf("%d: exprList\n", yylineno);
 	checkFirstFollow(ExprList_FirstFollow);
 	expr();
-	while (errorMessage == 0 && currentToken == Token_comma){
+	while (currentToken == Token_comma){
 		match(Token_comma);
 		expr();
 	}
@@ -435,10 +436,10 @@ void exprList(){
 					| ε
 */
 void expr(){
-	//printf("%d: expr\n", yylineno);
+	printf("%d: expr\n", yylineno);
 	checkFirstFollow(Expr_FirstFollow);
 	simpleExpr();
-	while (errorMessage == 0 && (currentToken == Token_less || currentToken == Token_leq || currentToken == Token_bigger || currentToken == Token_beq || currentToken == Token_eq || currentToken == Token_noteq)){
+	while (currentToken == Token_less || currentToken == Token_leq || currentToken == Token_bigger || currentToken == Token_beq || currentToken == Token_eq || currentToken == Token_noteq){
 		relOp();
 		simpleExpr();
 	}
@@ -450,10 +451,10 @@ simpleExpr' 	→ addOp term simpleExpr'
 				| ε
 */
 void simpleExpr(){
-	//printf("%d: simpleExpr\n", yylineno);
+	printf("%d: simpleExpr\n", yylineno);
 	checkFirstFollow(SimpleExpr_FirstFollow);
 	term();
-	while(errorMessage == 0 && (currentToken == Token_add || currentToken == Token_sub || currentToken == Token_or)){
+	while(currentToken == Token_add || currentToken == Token_sub || currentToken == Token_or){
 		addOp();
 		term();
 	}
@@ -465,10 +466,10 @@ void simpleExpr(){
 					| ε
 */
 void term(){
-	//printf("%d: term\n", yylineno);
+	printf("%d: term\n", yylineno);
 	checkFirstFollow(Term_FirstFollow);
 	factor();
-	while(errorMessage == 0 && (currentToken == Token_mult || currentToken == Token_divide || currentToken == Token_div || currentToken == Token_mod || currentToken == Token_and)){
+	while(currentToken == Token_mult || currentToken == Token_divide || currentToken == Token_div || currentToken == Token_mod || currentToken == Token_and){
 		mulOp();
 		factor();
 	}
@@ -487,7 +488,7 @@ void term(){
 				| ε
 */
 void factor(){
-	//printf("%d: factor\n", yylineno);
+	printf("%d: factor\n", yylineno);
 	checkFirstFollow(Factor_FirstFollow);
 	switch(currentToken){
 		case Token_Integer:
@@ -535,7 +536,7 @@ index'			→ ]
 				| .. simpleExpr ]
 */
 void arrayIndex(){
-	//printf("%d: index\n", yylineno);
+	printf("%d: index\n", yylineno);
 	match(Token_lRectBracket);
 	simpleExpr();
 	if(currentToken == Token_dot){
@@ -553,7 +554,7 @@ void arrayIndex(){
 					| index := expr
 */
 void assignStmt(){
-	//printf("%d: assignStmt\n", yylineno);
+	printf("%d: assignStmt\n", yylineno);
 	checkFirstFollow(AssignStmt_FirstFollow);
 	match(Token_identifier);
 	if(currentToken == Token_lRectBracket){
@@ -570,21 +571,16 @@ void assignStmt(){
 					| ε
 */
 void ifStmt(){
-	//printf("%d: ifStmt\n", yylineno);
+	printf("%d: ifStmt\n", yylineno);
 	checkFirstFollow(IfStmt_FirstFollow);
 	match(Token_if);
 	expr();
 	match(Token_then);
 	statement();
 	if(currentToken == Token_else){
-		elsePart();
+		match(Token_else);
+		statement();
 	}
-}
-
-void elsePart(){
-	//printf("%d: elsePart\n", yylineno);
-	match(Token_else);
-	statement();
 }
 
 /*
@@ -592,7 +588,7 @@ void elsePart(){
 */
 
 void whileStmt(){
-	//printf("%d: whileStmt\n", yylineno);
+	printf("%d: whileStmt\n", yylineno);
 	checkFirstFollow(WhileStmt_FirstFollow);
 	match(Token_while);
 	expr();
@@ -606,7 +602,7 @@ void whileStmt(){
 */
 
 void forStmt(){
-	//printf("%d: forStmt\n", yylineno);
+	printf("%d: forStmt\n", yylineno);
 	checkFirstFollow(ForStmt_FirstFollow);
 	match(Token_for);
 	match(Token_identifier);
@@ -619,7 +615,7 @@ void forStmt(){
 }
 
 void toPart(){
-	//printf("%d: forStmt\n", yylineno);
+	printf("%d: forStmt\n", yylineno);
 	checkFirstFollow(ToPart_FirstFollow);
 	switch(currentToken){
 		case Token_to:
@@ -643,7 +639,7 @@ void toPart(){
                     | WRITE ( exprList )
 */
 void statement(){
-	//printf("%d: statement\n", yylineno);
+	printf("%d: statement\n", yylineno);
 	checkFirstFollow(Statement_FirstFollow);
 	switch(currentToken){
 		case Token_identifier:
@@ -684,10 +680,10 @@ void statement(){
 					| ε
 */
 void stmtList(){
-	//printf("%d: stmtList\n", yylineno);
+	printf("%d: stmtList\n", yylineno);
 	checkFirstFollow(StmtList_FirstFollow);
 	statement();
-	while (errorMessage == 0 && currentToken == Token_semicolon){
+	while (currentToken == Token_semicolon){
 		match(Token_semicolon);
 		statement();
 	}
@@ -698,7 +694,7 @@ void stmtList(){
 	compStmt 		→ BEGIN stmtList END
 */
 void compStmt(){
-	//printf("%d: compStmt\n", yylineno);
+	printf("%d: compStmt\n", yylineno);
 	checkFirstFollow(CompStmt_FirstFollow);
 	match(Token_begin);
 	stmtList();
@@ -710,17 +706,17 @@ void compStmt(){
 					| IDENT
 */
 void identList(){
-	//printf("%d: identList\n", yylineno);
+	printf("%d: identList\n", yylineno);
 	checkFirstFollow(IdentList_FirstFollow);
 	match(Token_identifier);
-	while (errorMessage == 0 && currentToken == Token_comma){
+	while (currentToken == Token_comma){
 		match(Token_comma);
 		match(Token_identifier);
 	}
 }
 
 void simpleType(){
-	//printf("%d: simpleType\n", yylineno);
+	printf("%d: simpleType\n", yylineno);
 	checkFirstFollow(SimpleType_FirstFollow);
 	switch(currentToken){
 		case Token_real:
@@ -742,7 +738,7 @@ void simpleType(){
 				| ARRAY [ NUM .. NUM ] OF simpleType
 */
 void type(){
-	//printf("%d: type\n", yylineno);
+	printf("%d: type\n", yylineno);
 	checkFirstFollow(Type_FirstFollow);
 	switch(currentToken){
 		case Token_array:
@@ -765,7 +761,7 @@ void type(){
 	identListType 	→ identList : type	
 */
 void identListType(){
-	//printf("%d: identListType\n", yylineno);
+	printf("%d: identListType\n", yylineno);
 	checkFirstFollow(IdentListType_FirstFollow);
 	identList();
 	match(Token_colon);
@@ -780,10 +776,10 @@ void identListType(){
 					|ε
 */
 void varDecList(){
-	//printf("%d: varDecList\n", yylineno);
+	printf("%d: varDecList\n", yylineno);
 	checkFirstFollow(VarDecList_FirstFollow);
 	identListType();
-	while (errorMessage == 0 && currentToken == Token_semicolon){
+	while (currentToken == Token_semicolon){
 		match(Token_semicolon);
 		if (currentToken == Token_identifier)
 			identListType();
@@ -797,7 +793,7 @@ void varDecList(){
 					| ε
 */
 void varDec(){
-	//printf("%d: varDec\n", yylineno);
+	printf("%d: varDec\n", yylineno);
 	match(Token_var);
 	varDecList();
 	//printf("%d: End varDec\n", yylineno);	
@@ -809,7 +805,7 @@ void varDec(){
 void start() {
 	currentToken = yylex();
 	checkFirstFollow(Start_FirstFollow);
-	//printf("%d: start\n", yylineno);
+	printf("%d: start\n", yylineno);
 	match(Token_program);
 	match(Token_identifier);
 	match(Token_semicolon);
@@ -904,7 +900,6 @@ CloseCom				"*)"
 void yyerror(char *s)
 {
     printf("Error at line %d: %s at %s\n", yylineno, s, yytext);
-    errorMessage = 1;
 }
 
 

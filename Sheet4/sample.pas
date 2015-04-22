@@ -4,7 +4,7 @@
 
 program minipas;
 	
-	var x, y, i: integer;      
+	var x, y, i: integer;
 	a: array [1..100] of real;
 
 	begin
@@ -28,7 +28,7 @@ program minipas;
 		i := 2;
 		for i := 2 to n do
 		begin
-			y := y * i
+			y := y * / * i
 		end;
 		write(y);
 
@@ -45,7 +45,7 @@ program minipas;
 
 		{ Determine if x is a prime number }
 		read(x);
-		if x mod 2 = 0 then
+		if x  2 = 0 then
 			write(x, " is not a prime number.")
 		else
 			i := 3;
