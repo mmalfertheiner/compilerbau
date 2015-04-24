@@ -1,3 +1,14 @@
-flex lexer.l
-gcc lex.yy.c
-./a.out < sample.pas
+all: parser
+
+parser: lex.yy.c y.tab.c
+	gcc -g -O lex.yy.c y.tab.c -o parser
+
+lex.yy.c: y.tab.c lexer.l
+	lex lexer.l
+
+y.tab.c: parser.y
+	yacc -d parser.y
+
+clean:
+	rm -f lex.yy.c y.tab.c y.tab.h parser
+	rm -rf parser.dSYM

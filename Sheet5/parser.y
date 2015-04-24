@@ -3,6 +3,7 @@
 #include <stdio.h>
 
 extern int yylex(void);
+extern int yylineno;
 
 int yyerror (char *);
 
@@ -24,7 +25,6 @@ int yyerror (char *);
 %token	Token_downTo
 %token	Token_else
 %token	Token_end
-%token	Token_EOF
 %token	Token_eq
 %token	Token_error
 %token	Token_false
@@ -65,6 +65,11 @@ int yyerror (char *);
 
 %start		start
 
+/* Expect one shift/reduce conflict */
+%expect 1
+
+%error-verbose
+
 %%
 
 
@@ -80,21 +85,21 @@ varDecList		:	varDecList identListType Token_semicolon
 				;
 
 
-identListType	:	identList Token_comma type
+identListType	:	identList Token_colon type
 				;
 
 
-identList 		:	identList Token_colon Token_identifier 
+identList 		:	identList Token_comma Token_identifier 
 				|	Token_identifier
 				;
 
 type 			:	simpleType
-				|	Token_array Token_lRectBracket Token_integer Token_dot Token_dot Token_integer Token_lRectBracket Token_of simpleType
+				|	Token_array Token_lRectBracket Token_Integer Token_dot Token_dot Token_Integer Token_rRectBracket Token_of simpleType
 				;
 
-simpleType		:	Token_Integer
-				|	Token_Real
-				|	Token_String
+simpleType		:	Token_integer
+				|	Token_real
+				|	Token_string
 				;
 
 compStmt		:	Token_begin stmtList Token_end
@@ -146,7 +151,7 @@ expr 			:	simpleExpr relOp simpleExpr
 				|	simpleExpr
 				;
 
-simpleExpr 		|	simpleExpr addOp term
+simpleExpr 		:	simpleExpr addOp term
 				|	term
 				;
 
@@ -154,16 +159,16 @@ term			:	term mulOp factor
 				|	factor
 				;
 
-factor 			:	Token_integer 
-				| 	Token_real
-				|	Token_string
+factor 			:	Token_Integer 
+				| 	Token_Real
+				|	Token_String
 				|	Token_false
 				|	Token_true
 				|	Token_identifier
 				|	Token_identifier index 
 				| 	Token_not factor 
 				| 	Token_sub factor
-				| 	Token_lBracket exp Token_rBracket
+				| 	Token_lBracket expr Token_rBracket
 				;
 
 relOp 			: 	Token_less
@@ -188,11 +193,11 @@ mulOp 			: 	Token_mult
 
 %%
 
-main() {
+int main() {
 	return yyparse();
 }
 
 int yyerror(char *s) {
-  fprintf(stderr, "%s\n", s);
+  fprintf(stderr, "%s at line: %d\n", s, yylineno);
   return 0;
 }

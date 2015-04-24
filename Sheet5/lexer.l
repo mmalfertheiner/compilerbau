@@ -1,10 +1,12 @@
 %{
 #include <stdio.h>
 #include <string.h>
+#include "y.tab.h"
 
 %}
 
 %option noyywrap
+%option yylineno
 
 
 Blanks					[ ]+
@@ -22,10 +24,10 @@ CloseCom				"*)"
 
 %%
 
-{NewLines}				{ yylineno++; }
+{NewLines}				
 {Blanks}				
 {Tabs}							
-{OldComment}			{ yylineno++; }
+{OldComment}			
 {String}				return Token_String;
 {Integer}				return Token_Integer;
 {Real}					return Token_Real;
@@ -78,22 +80,7 @@ CloseCom				"*)"
 "("						return Token_lBracket;
 ")"						return Token_rBracket;
 {Identifier}			return Token_identifier;
-<<EOF>> 				return Token_EOF;
 
-.						{ yyerror(yytext); return Token_error; }
+.						{ return Token_error; }
 
 %%
-
-void yyerror(char *s)
-{
-    printf("Error at line %d: %s at %s\n", yylineno, s, yytext);
-}
-
-
-
-int main(int argc, char **argv) {
-	start();
-
-  	return 0;
-}
-
