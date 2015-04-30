@@ -1,7 +1,7 @@
 all: parser
 
 parser: lex.yy.c y.tab.c
-	gcc -g -O lex.yy.c y.tab.c -o parser
+	gcc -g -O lex.yy.c parser.tab.c -o parser
 
 lex.yy.c: y.tab.c lexer.l
 	lex lexer.l
