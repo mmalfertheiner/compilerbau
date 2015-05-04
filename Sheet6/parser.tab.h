@@ -34,7 +34,7 @@
 # define YY_YY_PARSER_TAB_H_INCLUDED
 /* Debug traces.  */
 #ifndef YYDEBUG
-# define YYDEBUG 0
+# define YYDEBUG 1
 #endif
 #if YYDEBUG
 extern int yydebug;
@@ -102,7 +102,18 @@ extern int yydebug;
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-typedef int YYSTYPE;
+typedef union YYSTYPE YYSTYPE;
+union YYSTYPE
+{
+#line 20 "parser.y" /* yacc.c:1909  */
+
+	int iValue; 		/* integer, true, false, compOp, addOp, mulOp */
+	float fValue;		/* number */		
+	char *identifier;	/* string, identifier */
+	struct _node *body; /* list of BNF right-hand side symbols of nonterminal type */
+
+#line 116 "parser.tab.h" /* yacc.c:1909  */
+};
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
 #endif

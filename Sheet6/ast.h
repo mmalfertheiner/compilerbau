@@ -7,8 +7,8 @@
 
 
 typedef enum { 
-	PROGRAM, ASSIGN, IF, WHILE, STATEMENT, CONST, VAR, TYPE,
-	EXPR, INT_CONST, REAL_CONST, BOOL_CONST, STRING_CONST, IDENTIFIER, OP
+	PROGRAM, ASSIGN, IF, WHILE, FOR, STATEMENT, CONST, VAR, TYPE,
+	EXPR, INT_CONST, REAL_CONST, FACTOR, BOOL_CONST, STRING_CONST, ARRAY_IDENTIFIER, IDENTIFIER, OP
 	} node_type;
 
 typedef enum { 
@@ -24,7 +24,7 @@ typedef struct _node {
 		struct _node *body; /* list of BNF right-hand side symbols of nonterminal type */
 	};
 	struct _node *next;		/* decl-list, stmt-list */
-} node_ast, ast;
+} node_ast;
 
 /* Node creation/manipulation functions */
 static inline node_ast* ast_new_rawNode(const node_type type)
