@@ -1,0 +1,325 @@
+%{ 
+
+#include <stdio.h>
+#include "ast.h"
+
+#define YYERROR_VERBOSE
+
+extern int yylex(void);
+extern int yylineno;
+
+int yyerror (const char *s);
+
+unsigned int errorFound = 0;
+node_ast *ast = NULL;
+
+int yydebug=1;
+
+%}
+
+%union {
+	int iValue; 		/* integer, true, false, compOp, addOp, mulOp */
+	float fValue;		/* number */		
+	char *identifier;	/* string, identifier */
+	struct _node *body; /* list of BNF right-hand side symbols of nonterminal type */
+};
+
+
+%token	Token_add
+%token	Token_and
+%token	Token_array
+%token	Token_assign
+%token	Token_begin
+%token	Token_beq
+%token	Token_bigger
+%token	Token_colon
+%token	Token_comma
+%token	Token_div
+%token	Token_divide
+%token	Token_do
+%token	Token_dot
+%token	Token_downTo
+%token	Token_else
+%token	Token_end
+%token	Token_eq
+%token	Token_error
+%token	Token_false
+%token	Token_for
+%token	Token_identifier
+%token	Token_if
+%token	Token_Integer
+%token	Token_integer
+%token	Token_lBracket
+%token	Token_leq
+%token	Token_less
+%token	Token_lRectBracket
+%token	Token_mod
+%token	Token_mult
+%token	Token_not
+%token	Token_noteq
+%token	Token_of
+%token	Token_or
+%token	Token_program
+%token	Token_rBracket
+%token	Token_read
+%token	Token_Real
+%token	Token_real
+%token	Token_repeat
+%token	Token_rRectBracket
+%token	Token_semicolon
+%token	Token_String
+%token	Token_string
+%token	Token_sub
+%token	Token_then
+%token	Token_to
+%token	Token_true
+%token	Token_until
+%token	Token_var
+%token	Token_while
+%token	Token_write
+
+
+%start		start
+
+/*	Nonterminal types	*/
+%type <iValue> 	relOp addOp mulOp
+%type <body>	assignStmt
+				compStmt
+				elsePart
+				expr
+				exprList
+				factor
+				forStmt
+				identList
+				identListType
+				ifStmt
+				index
+				simpleExpr
+				simpleType
+				start
+				statement
+				stmtList
+				term
+				toPart
+				type
+				varDec
+				varDecList
+				whileStmt
+
+
+
+/* Expect one shift/reduce conflict */
+%expect 1
+
+%error-verbose
+
+%%
+
+
+start			:	Token_program Token_identifier 
+						Token_semicolon varDec compStmt Token_dot 		{ ast = ast_new_bodyNodeN(PROGRAM, 2, 
+			 												   				ast_new_strNode(IDENTIFIER, $<identifier>2),
+																	   $4); }
+				;
+
+varDec 			:	Token_var varDecList								{ $$ = $2; }
+				|	/* Epsilon */										{ $$ = NULL; }
+				;
+
+varDecList		:	varDecList identListType Token_semicolon			{ $$ = $1; 
+																			ast_addNode($1, $2); 
+																		}
+				| 	identListType Token_semicolon						{ $$ = $1; }
+				;
+
+
+identListType	:	identList Token_colon type							{ $$ = $1;
+																			ast_addNode($1, $3);
+																		}
+				;
+
+
+identList 		:	identList Token_comma Token_identifier 				{ $$ = $1;
+																			$$ = ast_new_bodyNodeN(VAR, 1, 
+																	   		ast_new_strNode(IDENTIFIER, $<identifier>3)); 
+																		}
+				|	Token_identifier									{ $$ = ast_new_bodyNodeN(VAR, 1, 
+																	   		ast_new_strNode(IDENTIFIER, $<identifier>1)); 
+																		}
+				;
+
+type 			:	simpleType
+				|	Token_array Token_lRectBracket Token_Integer 
+						Token_dot Token_dot Token_Integer 
+						Token_rRectBracket Token_of simpleType			{ $$ = ast_new_bodyNodeN(VAR, 2, 
+					 												   		ast_new_iNode(INT_CONST, $<iValue>3), $9);
+					 													}
+				;
+
+
+
+simpleType		:	Token_integer							{ $$ = ast_new_strNode(TYPE, "integer"); }
+				|	Token_real								{ $$ = ast_new_strNode(TYPE, "real"); }
+				|	Token_string							{ $$ = ast_new_strNode(TYPE, "string"); }
+				;
+
+
+
+compStmt		:	Token_begin stmtList Token_end								{ $$ = $2; }
+				;
+
+
+
+stmtList		:	stmtList Token_semicolon statement							{ $$ = $1;
+																					ast_addNode($1, $3);
+																				}
+				| 	statement
+				;
+
+
+
+statement		:	assignStmt
+				| 	compStmt
+				| 	ifStmt
+				| 	whileStmt
+				| 	forStmt
+				| 	Token_read Token_lBracket exprList Token_rBracket			{ $$ = $3; }
+				| 	Token_write Token_lBracket exprList Token_rBracket			{ $$ = $3; }
+				;
+
+assignStmt		:	Token_identifier index Token_assign expr		{ $$ = ast_new_bodyNodeN(ASSIGN, 2, 	
+																	   ($2 ? ast_new_bodyNodeN(ARRAY_IDENTIFIER, 2,
+																	       		 ast_new_strNode(IDENTIFIER, 
+																	   	   		 $<identifier>1), $2) :
+																	        ast_new_strNode(IDENTIFIER, 
+																	        	 $<identifier>1)
+																	   ), $4);
+																	}
+				/*| 	Token_identifier index Token_assign expr*/
+				;
+
+
+
+index			:	Token_lRectBracket expr Token_rRectBracket								{ $$ = $2; }
+				/*| 	Token_lRectBracket expr Token_dot Token_dot expr Token_rRectBracket		{ $$ = ast_new_bodyNodeN(FOR, 4,
+											 												   ast_new_strNode(IDENTIFIER, $<identifier>2),
+																							   $4, $6, $8); }*/
+				;
+
+
+
+ifStmt			:	Token_if expr Token_then statement elsePart		{ $$ = ast_new_bodyNodeN(IF, 3, $2, $4, $5); }
+				;
+
+
+
+elsePart		:	Token_else statement						{ $$ = $2; }
+				|	/* Epsilon */								{ $$ = NULL; }
+				;
+
+
+
+whileStmt		:	Token_while expr Token_do statement			{ $$ = ast_new_bodyNodeN(WHILE, 2, $2, $4); }
+				;
+
+
+
+forStmt 		:	Token_for Token_identifier Token_assign 
+						expr toPart expr Token_do statement   	{ $$ = ast_new_bodyNodeN(FOR, 4,
+					 												   ast_new_strNode(IDENTIFIER, $<identifier>2),
+																	   $4, $6, $8); }
+				;
+
+
+
+toPart			:	Token_to								{ $$ = ast_new_strNode(CONST, "to"); }
+				| 	Token_downTo							{ $$ = ast_new_strNode(CONST, "downto"); }
+				;
+
+
+
+exprList		:	exprList Token_comma expr 				{ $$ = $1;
+																ast_addNode($1, $3);
+															}
+				|	expr
+				;
+
+
+
+expr 			:	simpleExpr relOp simpleExpr				{ $$ = ast_new_bodyNodeN(EXPR, 3, $1, 
+																		ast_new_iNode(OP, $2), $3);
+															}
+				|	simpleExpr
+				;
+
+
+
+simpleExpr 		:	simpleExpr addOp term					{ $$ = ast_new_bodyNodeN(EXPR, 3, $1, 
+																	   ast_new_iNode(OP, $2), $3);
+															}
+				|	term
+				;
+
+
+
+term			:	term mulOp factor						{ $$ = ast_new_bodyNodeN(EXPR, 3, $1, 
+																	   ast_new_iNode(OP, $2), $3);
+															}
+				|	factor
+				;
+
+
+
+factor 			:	Token_Integer 							{ $$ = ast_new_iNode(INT_CONST, $<iValue>1);	}
+				| 	Token_Real 								{ $$ = ast_new_fNode(REAL_CONST, $<fValue>1);	}
+				|	Token_String 							{ $$ = ast_new_strNode(STRING_CONST, $<identifier>1); }
+				|	Token_false 							{ $$ = ast_new_iNode(Token_false, $<iValue>0); }
+				|	Token_true 								{ $$ = ast_new_iNode(Token_true, $<iValue>1); }
+				|	Token_identifier index  				{ $$ = $2 ?	ast_new_bodyNodeN(ARRAY_IDENTIFIER, 2,
+																	   		ast_new_strNode(Token_identifier, 
+																	   		$<identifier>1), $2) :
+																	   ast_new_strNode(Token_identifier, $<identifier>1);
+															}
+				| 	Token_not factor  						{ $$ = ast_new_bodyNode(FACTOR, $2); }
+				| 	Token_sub factor 						{ $$ = ast_new_bodyNode(FACTOR, $2); }
+				| 	Token_lBracket expr Token_rBracket 		{ $$ = ast_new_bodyNode(EXPR, $2); }
+				;
+
+
+
+relOp 			: 	Token_less			{ $$ = Token_less; }
+				| 	Token_leq			{ $$ = Token_leq; }
+				| 	Token_bigger		{ $$ = Token_bigger; }
+				| 	Token_beq			{ $$ = Token_beq; }
+				| 	Token_eq			{ $$ = Token_eq; }
+				| 	Token_noteq			{ $$ = Token_noteq; }
+				;
+
+
+
+addOp 			:	Token_add			{ $$ = Token_add; }
+				| 	Token_sub			{ $$ = Token_sub; }
+				|	Token_or			{ $$ = Token_or; }
+				;
+
+
+
+mulOp 			: 	Token_mult 			{ $$ = Token_mult; }
+				|	Token_divide		{ $$ = Token_divide; }
+				|	Token_div			{ $$ = Token_div; }
+				| 	Token_mod			{ $$ = Token_mod; }
+				| 	Token_and			{ $$ = Token_and; }
+				;
+
+
+
+%%
+
+int main() {
+	return yyparse();
+}
+
+int yyerror(const char *s) {
+  fprintf(stderr, "%s at line: %d\n", s, yylineno);
+  return 0;
+}
