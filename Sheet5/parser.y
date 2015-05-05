@@ -48,7 +48,6 @@ int yyerror (char *);
 %token	Token_read
 %token	Token_Real
 %token	Token_real
-%token	Token_repeat
 %token	Token_rRectBracket
 %token	Token_semicolon
 %token	Token_String
@@ -57,7 +56,6 @@ int yyerror (char *);
 %token	Token_then
 %token	Token_to
 %token	Token_true
-%token	Token_until
 %token	Token_var
 %token	Token_while
 %token	Token_write
