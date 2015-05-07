@@ -119,11 +119,12 @@ int yydebug=1;
 start			:	Token_program Token_identifier 
 						Token_semicolon varDec compStmt Token_dot 		{ ast = ast_new_bodyNodeN(PROGRAM, 2, 
 			 												   				ast_new_strNode(IDENTIFIER, $<identifier>2),
-																	   $4); }
+																	   		$4);
+																		}
 				;
 
 varDec 			:	Token_var varDecList								{ $$ = $2; }
-				|	/* Epsilon */										{ $$ = NULL; }
+				|	/* Epsilon */										{ }
 				;
 
 varDecList		:	varDecList identListType Token_semicolon			{ $$ = $1; 
@@ -150,17 +151,17 @@ identList 		:	identList Token_comma Token_identifier 				{ $$ = $1;
 
 type 			:	simpleType
 				|	Token_array Token_lRectBracket Token_Integer 
-						Token_dot Token_dot Token_Integer 
-						Token_rRectBracket Token_of simpleType			{ $$ = ast_new_bodyNodeN(VAR, 2, 
+					Token_dot Token_dot Token_Integer 
+					Token_rRectBracket Token_of simpleType				{ $$ = ast_new_bodyNodeN(VAR, 2, 
 					 												   		ast_new_iNode(INT_CONST, $<iValue>3), $9);
 					 													}
 				;
 
 
 
-simpleType		:	Token_integer							{ $$ = ast_new_strNode(TYPE, "integer"); }
-				|	Token_real								{ $$ = ast_new_strNode(TYPE, "real"); }
-				|	Token_string							{ $$ = ast_new_strNode(TYPE, "string"); }
+simpleType		:	Token_integer										{ $$ = ast_new_strNode(TYPE, "integer"); }
+				|	Token_real											{ $$ = ast_new_strNode(TYPE, "real"); }
+				|	Token_string										{ $$ = ast_new_strNode(TYPE, "string"); }
 				;
 
 
@@ -183,27 +184,25 @@ statement		:	assignStmt
 				| 	ifStmt
 				| 	whileStmt
 				| 	forStmt
-				| 	Token_read Token_lBracket exprList Token_rBracket			{ $$ = $3; }
-				| 	Token_write Token_lBracket exprList Token_rBracket			{ $$ = $3; }
+				| 	Token_read Token_lBracket exprList Token_rBracket			{ $$ = ast_new_bodyNode(READ, $3); }
+				| 	Token_write Token_lBracket exprList Token_rBracket			{ $$ = ast_new_bodyNode(WRITE, $3); }
 				;
 
-assignStmt		:	Token_identifier index Token_assign expr		{ $$ = ast_new_bodyNodeN(ASSIGN, 2, 	
-																	   ($2 ? ast_new_bodyNodeN(ARRAY_IDENTIFIER, 2,
-																	       		 ast_new_strNode(IDENTIFIER, 
-																	   	   		 $<identifier>1), $2) :
-																	        ast_new_strNode(IDENTIFIER, 
-																	        	 $<identifier>1)
-																	   ), $4);
-																	}
-				/*| 	Token_identifier index Token_assign expr*/
+assignStmt		:	Token_identifier Token_assign expr 							{ $$ = ast_new_bodyNodeN(ASSIGN, 2, 
+																						ast_new_strNode(IDENTIFIER, $<identifier>1), $3);
+																				}
+				|	Token_identifier index Token_assign expr					{ $$ = ast_new_bodyNodeN(ASSIGN, 2, 	
+																				   		ast_new_bodyNodeN(ARRAY_IDENTIFIER, 2,
+																				       		 ast_new_strNode(IDENTIFIER, 
+																				   	   		 $<identifier>1)
+																				   	   		 , $2)
+																				   		, $4);
+																				}
 				;
 
 
 
 index			:	Token_lRectBracket expr Token_rRectBracket								{ $$ = $2; }
-				/*| 	Token_lRectBracket expr Token_dot Token_dot expr Token_rRectBracket		{ $$ = ast_new_bodyNodeN(FOR, 4,
-											 												   ast_new_strNode(IDENTIFIER, $<identifier>2),
-																							   $4, $6, $8); }*/
 				;
 
 
@@ -275,10 +274,11 @@ factor 			:	Token_Integer 							{ $$ = ast_new_iNode(INT_CONST, $<iValue>1);	}
 				|	Token_String 							{ $$ = ast_new_strNode(STRING_CONST, $<identifier>1); }
 				|	Token_false 							{ $$ = ast_new_iNode(Token_false, $<iValue>0); }
 				|	Token_true 								{ $$ = ast_new_iNode(Token_true, $<iValue>1); }
-				|	Token_identifier index  				{ $$ = $2 ?	ast_new_bodyNodeN(ARRAY_IDENTIFIER, 2,
-																	   		ast_new_strNode(Token_identifier, 
-																	   		$<identifier>1), $2) :
-																	   ast_new_strNode(Token_identifier, $<identifier>1);
+				|	Token_identifier						{ $$ = ast_new_strNode(Token_identifier, $<identifier>1); }
+				|	Token_identifier index  				{ $$ = ast_new_bodyNodeN(ARRAY_IDENTIFIER, 2,
+																	   		ast_new_strNode(Token_identifier, $<identifier>1),
+																	   		$2
+																	   	);
 															}
 				| 	Token_not factor  						{ $$ = ast_new_bodyNode(FACTOR, $2); }
 				| 	Token_sub factor 						{ $$ = ast_new_bodyNode(FACTOR, $2); }
@@ -287,30 +287,29 @@ factor 			:	Token_Integer 							{ $$ = ast_new_iNode(INT_CONST, $<iValue>1);	}
 
 
 
-relOp 			: 	Token_less			{ $$ = Token_less; }
-				| 	Token_leq			{ $$ = Token_leq; }
-				| 	Token_bigger		{ $$ = Token_bigger; }
-				| 	Token_beq			{ $$ = Token_beq; }
-				| 	Token_eq			{ $$ = Token_eq; }
-				| 	Token_noteq			{ $$ = Token_noteq; }
+relOp 			: 	Token_less			{ $$ = LT; }
+				| 	Token_leq			{ $$ = LE; }
+				| 	Token_bigger		{ $$ = GT; }
+				| 	Token_beq			{ $$ = GE; }
+				| 	Token_eq			{ $$ = EQ; }
+				| 	Token_noteq			{ $$ = NE; }
 				;
 
 
 
-addOp 			:	Token_add			{ $$ = Token_add; }
-				| 	Token_sub			{ $$ = Token_sub; }
-				|	Token_or			{ $$ = Token_or; }
+addOp 			:	Token_add			{ $$ = PLUS; }
+				| 	Token_sub			{ $$ = MINUS; }
+				|	Token_or			{ $$ = OR; }
 				;
 
 
 
-mulOp 			: 	Token_mult 			{ $$ = Token_mult; }
-				|	Token_divide		{ $$ = Token_divide; }
-				|	Token_div			{ $$ = Token_div; }
-				| 	Token_mod			{ $$ = Token_mod; }
-				| 	Token_and			{ $$ = Token_and; }
+mulOp 			: 	Token_mult 			{ $$ = MUL; }
+				|	Token_divide		{ $$ = DIV; }
+				|	Token_div			{ $$ = DIV; }
+				| 	Token_mod			{ $$ = MOD; }
+				| 	Token_and			{ $$ = AND; }
 				;
-
 
 
 %%

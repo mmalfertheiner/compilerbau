@@ -7,7 +7,7 @@
 
 
 typedef enum { 
-	PROGRAM, ASSIGN, IF, WHILE, FOR, STATEMENT, CONST, VAR, TYPE,
+	PROGRAM, ASSIGN, READ, WRITE, IF, WHILE, FOR, STATEMENT, CONST, VAR, TYPE,
 	EXPR, INT_CONST, REAL_CONST, FACTOR, BOOL_CONST, STRING_CONST, ARRAY_IDENTIFIER, IDENTIFIER, OP
 	} node_type;
 
@@ -27,56 +27,19 @@ typedef struct _node {
 } node_ast;
 
 /* Node creation/manipulation functions */
-static inline node_ast* ast_new_rawNode(const node_type type)
-{
-	node_ast *node = (node_ast*)malloc(sizeof(node_ast));
+node_ast* ast_new_rawNode(node_type type);
 
-	node->type = type;
-	node->next = NULL;
-	return node;
-}
+node_ast* ast_new_iNode(node_type type, int iValue);
 
-static inline node_ast* ast_new_iNode(const node_type type, const int iValue)
-{
-	node_ast *node = ast_new_rawNode(type);
+node_ast* ast_new_fNode(node_type type, float fValue);
 
-	node->iValue = iValue;
-	return node;
-}	
+node_ast* ast_new_strNode(node_type type, char* str);
 
-static inline node_ast* ast_new_fNode(const node_type type, const float fValue)
-{
-	node_ast *node = ast_new_rawNode(type);
+node_ast* ast_new_vBodyNodeN(node_type type, unsigned char n, va_list bodies);
 
-	node->fValue = fValue;
-	return node;
-}
+node_ast* ast_new_bodyNodeN(node_type type, unsigned char n, ...);
 
-static inline node_ast* ast_new_strNode(const node_type type, char* str)
-{
-	node_ast *node = ast_new_rawNode(type);
-
-	node->identifier = str;
-	return node;
-}
-
-node_ast* ast_new_vBodyNodeN(const node_type type, const unsigned char n, va_list bodies);
-
-static inline node_ast* ast_new_bodyNodeN(const node_type type, unsigned char n, ...)
-{
-	node_ast *node;
-	va_list bodies;
-
-	va_start(bodies, n);
-	node = ast_new_vBodyNodeN(type, n, bodies);
-	va_end(bodies);
-	return node;
-}
-
-static inline node_ast* ast_new_bodyNode(const node_type type, node_ast *body)
-{
-	return ast_new_bodyNodeN(type, 1, body);
-}
+node_ast* ast_new_bodyNode(node_type type, node_ast *body);
 
 node_ast* ast_addNode(node_ast *front, node_ast *newEnd);
 
