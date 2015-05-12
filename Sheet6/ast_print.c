@@ -19,10 +19,10 @@
 #endif
 
 
-void ast_nice_printNode(node_t* const node, const unsigned char indent);
-void ast_nice_printNextNode(node_t* const node);
-void ast_tree_printNode(node_t* const node, const unsigned char indent);
-void ast_tree_printNextNode(node_t* const node);
+void ast_nice_printNode(node_ast* const node, const unsigned char indent);
+void ast_nice_printNextNode(node_ast* const node);
+void ast_tree_printNode(node_ast* const node, const unsigned char indent);
+void ast_tree_printNextNode(node_ast* const node);
 
 unsigned int nodeCnt = 0;
 
@@ -39,75 +39,76 @@ char* ast_indentToStr(const unsigned char indent)
     return indentStr;
 }
 
-static inline char ast_strLast(const char *str)
+char ast_strLast(const char *str)
 {
     size_t len = strlen(str);
 
     return len > 0 ? str[len - 1] : '\0';
 }
 
-void ast_printNodeType(node_t* const node)
+
+void ast_printNodeType(node_ast* const node)
 {
     switch (node->type) {
-        case NT_LET:
-            printf("NT_LET");
+        case PROGRAM:
+            printf("PROGRAM");
             break;
-        case NT_ASSIGN:
-            printf("NT_ASSIGN");
+        case ASSIGN:
+            printf("ASSIGN");
             break;
-        case NT_IF:
-            printf("NT_IF");
+        case READ:
+            printf("READ");
             break;
-        case NT_WHILE:
-            printf("NT_WHILE");
+        case WRITE:
+            printf("WRITE");
             break;
-        case NT_FOR:
-            printf("NT_FOR");
+        case IF:
+            printf("IF");
             break;
-        case NT_STATEMENT:
-            printf("NT_STATEMENT");
+        case WHILE:
+            printf("WHILE");
             break;
-        case NT_CONST:
-            printf("NT_CONST");
+        case FOR:
+            printf("FOR");
             break;
-        case NT_VAR:
-            printf("NT_VAR");
+        case STATEMENT:
+            printf("STATEMENT");
             break;
-        case NT_TYPE:
-            printf("NT_TYPE");
+        case CONST:
+            printf("CONST");
             break;
-        case NT_EXPR:
-            printf("NT_EXPR");
+        case VAR:
+            printf("VAR");
             break;
-        case NT_INT_CONST:
-            printf("NT_INT_CONST");
+        case TYPE:
+            printf("TYPE");
             break;
-        case NT_REAL_CONST:
-            printf("NT_REAL_CONST");
+        case EXPR:
+            printf("EXPR");
             break;
-        case NT_BOOL_CONST:
-            printf("NT_BOOL_CONST");
+        case INT_CONST:
+            printf("INT_CONST");
             break;
-        case NT_STRING_CONST:
-            printf("NT_STRING_CONST");
+        case REAL_CONST:
+            printf("REAL_CONST");
             break;
-        case NT_IDENTIFIER:
-            printf("NT_IDENTIFIER");
+        case FACTOR:
+            printf("FACTOR");
             break;
-        case NT_ARRAY_IDENTIFIER:
-            printf("NT_ARRAY_IDENTIFIER");
+        case BOOL_CONST:
+            printf("BOOL_CONST");
             break;
-        case NT_OP:
-            printf("NT_OP");
+        case STRING_CONST:
+            printf("STRING_CONST");
             break;
-        case NT_READ:
-            printf("NT_READ");
+        case ARRAY_IDENTIFIER:
+            printf("ARRAY_IDENTIFIER");
             break;
-        case NT_WRITE:
-            printf("NT_WRITE");
+        case IDENTIFIER:
+            printf("IDENTIFIER");
             break;
-        case NT_DECL_LIST:
-            printf("NT_DECL_LIST");
+        case OP:
+            printf("OP");
             break;
         default:
             printf("Unknown node type \"%d\"", node->type);
@@ -115,13 +116,13 @@ void ast_printNodeType(node_t* const node)
     
 }
 
-void ast_nice_printBody(node_t* const node, const unsigned char indent, const char *delim, 
+void ast_nice_printBody(node_ast* const node, const unsigned char indent, const char *delim, 
     const BOOL skipLastDelim)
 {
     if (!node)
         printf("%s[Warning {%s}: Node is NULL!]", ast_indentToStr(indent), __FUNCTION__);
     else {
-        node_t *curr = node->body;
+        node_ast *curr = node->body;
 
         while (curr) {
             ast_nice_printNode(curr, indent);
@@ -132,13 +133,13 @@ void ast_nice_printBody(node_t* const node, const unsigned char indent, const ch
     }
 }
 
-void ast_nice_printBodyEx(node_t* const node, const unsigned char indent, const char *delims, 
+void ast_nice_printBodyEx(node_ast* const node, const unsigned char indent, const char *delims, 
     const unsigned char delimLen)
 {
     if (!node)
         printf("%s[Warning {%s}: Node is NULL!]", ast_indentToStr(indent), __FUNCTION__);
     else {
-        node_t *curr = node->body;
+        node_ast *curr = node->body;
         unsigned char delimPos = 0;
 
         while (curr) {
@@ -152,12 +153,12 @@ void ast_nice_printBodyEx(node_t* const node, const unsigned char indent, const 
     }
 }
 
-void ast_nice_printLetNode(node_t* const node, const unsigned char indent)
+void ast_nice_printProgramNode(node_ast* const node, const unsigned char indent)
 {
     char *newIndent[50];
 
     ast_nice_printNodeType();
-    printf("\n%sLET ", ast_indentToStr(indent));
+    printf("\n%sPROGRAM ", ast_indentToStr(indent));
     ast_nice_printNodeTypeEx();
     ast_nice_printBody(node->body, 0, "; ", TRUE);
     printf(" IN BEGIN\n");
@@ -165,14 +166,14 @@ void ast_nice_printLetNode(node_t* const node, const unsigned char indent)
     printf("%sEND;\n", ast_indentToStr(indent));
 } 
 
-static inline void ast_nice_printAssignNode(node_t* const node, const unsigned char indent)
+void ast_nice_printAssignNode(node_ast* const node, const unsigned char indent)
 {
     ast_nice_printNodeType();
     ast_nice_printBodyEx(node, 0, " := ", 4);
     printf(";\n");
 } 
 
-void ast_nice_printIfNode(node_t* const node, const unsigned char indent)
+void ast_nice_printIfNode(node_ast* const node, const unsigned char indent)
 {
     ast_nice_printNodeType();
     printf("IF (");
@@ -188,7 +189,7 @@ void ast_nice_printIfNode(node_t* const node, const unsigned char indent)
         printf("%sEND;\n", ast_indentToStr(indent));
 } 
 
-void ast_nice_printWhileNode(node_t* const node, const unsigned char indent)
+void ast_nice_printWhileNode(node_ast* const node, const unsigned char indent)
 {
     ast_nice_printNodeType();
     printf("WHILE (");
@@ -198,7 +199,7 @@ void ast_nice_printWhileNode(node_t* const node, const unsigned char indent)
     printf("%sEND;\n", ast_indentToStr(indent));
 } 
 
-void ast_nice_printForNode(node_t* const node, const unsigned char indent)
+void ast_nice_printForNode(node_ast* const node, const unsigned char indent)
 {
     ast_nice_printNodeType();
     printf("FOR ");
@@ -213,7 +214,7 @@ void ast_nice_printForNode(node_t* const node, const unsigned char indent)
     printf("%sEND;\n", ast_indentToStr(indent));
 } 
 
-static inline void ast_nice_printReadNode(node_t* const node, const unsigned char indent)
+void ast_nice_printReadNode(node_ast* const node, const unsigned char indent)
 {
     ast_nice_printNodeType();
     printf("READ ");
@@ -221,7 +222,7 @@ static inline void ast_nice_printReadNode(node_t* const node, const unsigned cha
     printf(";\n");
 } 
 
-static inline void ast_nice_printWriteNode(node_t* const node, const unsigned char indent)
+void ast_nice_printWriteNode(node_ast* const node, const unsigned char indent)
 {
     ast_nice_printNodeType();
     printf("WRITE ");
@@ -229,12 +230,12 @@ static inline void ast_nice_printWriteNode(node_t* const node, const unsigned ch
     printf(";\n");
 } 
 
-static inline void ast_nice_printStatementNode(node_t* const node, const unsigned char indent)
+void ast_nice_printStatementNode(node_ast* const node, const unsigned char indent)
 {    
     ast_nice_printBody(node, indent, "", TRUE);
 } 
 
-void ast_nice_printConstNode(node_t* const node, const unsigned char indent)
+void ast_nice_printConstNode(node_ast* const node, const unsigned char indent)
 {
     ast_nice_printNodeType();
     printf("CONST ");
@@ -243,7 +244,7 @@ void ast_nice_printConstNode(node_t* const node, const unsigned char indent)
     ast_nice_printNode(node->body ? node->body->next : NULL, 0);
 } 
 
-void ast_nice_printVarNode(node_t* const node, const unsigned char indent)
+void ast_nice_printVarNode(node_ast* const node, const unsigned char indent)
 {
     ast_nice_printNodeType();
     printf("VAR ");
@@ -252,103 +253,103 @@ void ast_nice_printVarNode(node_t* const node, const unsigned char indent)
     ast_nice_printNode(node->body ? node->body->next : NULL, 0);
 } 
 
-static inline void ast_nice_printTypeNode(node_t* const node, const unsigned char indent)
+void ast_nice_printTypeNode(node_ast* const node, const unsigned char indent)
 {
     ast_nice_printNodeType();
-    printf("%s", node->strValue);
+    printf("%s", node->identifier);
 } 
 
-static inline void ast_nice_printExprNode(node_t* const node, const unsigned char indent)
+void ast_nice_printExprNode(node_ast* const node, const unsigned char indent)
 {
     ast_nice_printNodeType();
     ast_nice_printBody(node, indent, "", TRUE);
 } 
 
-static inline void ast_nice_printIntConstNode(node_t* const node, const unsigned char indent)
+void ast_nice_printIntConstNode(node_ast* const node, const unsigned char indent)
 {
     ast_nice_printNodeType();
     printf("%d", node->iValue);
 } 
 
-static inline void ast_nice_printRealConstNode(node_t* const node, const unsigned char indent)
+void ast_nice_printRealConstNode(node_ast* const node, const unsigned char indent)
 {
     ast_nice_printNodeType();
     printf("%f", node->fValue);
 } 
 
-static inline void ast_nice_printBoolConstNode(node_t* const node, const unsigned char indent)
+void ast_nice_printBoolConstNode(node_ast* const node, const unsigned char indent)
 {
     ast_nice_printNodeType();
     printf("%s", node->iValue ? "TRUE" : "FALSE");
 } 
 
-static inline void ast_nice_printStringConstNode(node_t* const node, const unsigned char indent)
+void ast_nice_printStringConstNode(node_ast* const node, const unsigned char indent)
 {
     ast_nice_printNodeType();
-    printf("%s", node->strValue);
+    printf("%s", node->identifier);
 } 
 
-static inline void ast_nice_printIdentifierNode(node_t* const node, const unsigned char indent)
+void ast_nice_printIdentifierNode(node_ast* const node, const unsigned char indent)
 {
     ast_nice_printNodeType();
-    printf("%s", node->strValue);
+    printf("%s", node->identifier);
 } 
 
-void ast_nice_printArrayIdentifierNode(node_t* const node, const unsigned char indent)
+void ast_nice_printArrayIdentifierNode(node_ast* const node, const unsigned char indent)
 {
     ast_nice_printNodeType();
-    printf("%s[", node->body->strValue);
+    printf("%s[", node->body->identifier);
     ast_nice_printNode(node->body->next, 0);
     printf("]");
 } 
 
-void ast_nice_printOpNode(node_t* const node, const unsigned char indent)
+void ast_nice_printOpNode(node_ast* const node, const unsigned char indent)
 {
     ast_nice_printNodeType();
     switch (node->iValue) {
-        case OP_PLUS:
+        case PLUS:
             printf(" + ");
             break;
-        case OP_MINUS:
+        case MINUS:
             printf(" - ");
             break;
-        case OP_MUL:
+        case MUL:
             printf(" * ");
             break;
-        case OP_DIV:
+        case DIV:
             printf(" / ");
             break;
-        case OP_MOD:
+        case MOD:
             printf(" mod ");
             break;
-        case OP_LT:
+        case LT:
             printf(" < ");
             break;
-        case OP_LE:
+        case LE:
             printf(" <= ");
             break;
-        case OP_GT:
+        case GT:
             printf(" > ");
             break;
-        case OP_GE:
+        case GE:
             printf(" >= ");
             break;
-        case OP_EQ:
+        case EQ:
             printf(" = ");
             break;
-        case OP_NE:
+        case NE:
             printf(" <> ");
             break;
-        case OP_AND:
+        case AND:
             printf(" and ");
             break;
-        case OP_OR:
+        case OR:
             printf(" or ");
             break;
     }
 } 
 
-void ast_nice_print(ast_t* ast)
+void ast_nice_print(node_ast* ast)
 {
     if (!ast) 
         printf("Warning: Empty abstract syntax tree!\n");
@@ -360,265 +361,84 @@ void ast_nice_print(ast_t* ast)
     }
 }
 
-void ast_nice_printNextNode(node_t* node)
+void ast_nice_printNextNode(node_ast* node)
 {
     if (node->next) 
         ast_nice_printNextNode(node->next);
     ast_nice_printNode(node, 0);
 }
 
-void ast_nice_printNode(node_t* node, unsigned char indent)
+
+/*
+PROGRAM, ASSIGN, READ, WRITE, IF, WHILE, FOR, STATEMENT, CONST, VAR, TYPE,
+    EXPR, INT_CONST, REAL_CONST, FACTOR, BOOL_CONST, STRING_CONST, ARRAY_IDENTIFIER, IDENTIFIER, OP
+*/
+
+void ast_nice_printNode(node_ast* node, unsigned char indent)
 {
     if (!node) {
         printf("%s[Warning: Node is NULL!]", ast_indentToStr(indent));
         return;
     }
     switch (node->type) {
-        case NT_LET: 
-            ast_nice_printLetNode(node, indent);
-            break; 
-        case NT_ASSIGN: 
+        case PROGRAM: 
+            ast_nice_printProgramNode(node, indent);
+            break;
+        case ASSIGN: 
             ast_nice_printAssignNode(node, indent);
-            break; 
-        case NT_IF: 
-            ast_nice_printIfNode(node, indent);
-            break; 
-        case NT_WHILE: 
-            ast_nice_printWhileNode(node, indent);
-            break; 
-        case NT_FOR: 
-            ast_nice_printForNode(node, indent);
-            break; 
-        case NT_STATEMENT: 
-            ast_nice_printStatementNode(node, indent);
-            break; 
-        case NT_CONST: 
-            ast_nice_printConstNode(node, indent);
-            break; 
-        case NT_VAR: 
-            ast_nice_printVarNode(node, indent);
-            break; 
-        case NT_TYPE: 
-            ast_nice_printTypeNode(node, indent);
-            break; 
-        case NT_EXPR: 
-            ast_nice_printExprNode(node, indent);
-            break; 
-        case NT_INT_CONST: 
-            ast_nice_printIntConstNode(node, indent);
-            break; 
-        case NT_REAL_CONST: 
-            ast_nice_printRealConstNode(node, indent);
-            break; 
-        case NT_BOOL_CONST: 
-            ast_nice_printBoolConstNode(node, indent);
-            break; 
-        case NT_STRING_CONST:
-            ast_nice_printStringConstNode(node, indent);
-            break; 
-        case NT_IDENTIFIER: 
-            ast_nice_printIdentifierNode(node, indent);
-            break; 
-        case NT_ARRAY_IDENTIFIER: 
-            ast_nice_printArrayIdentifierNode(node, indent);
-            break; 
-        case NT_OP: 
-            ast_nice_printOpNode(node, indent);
-            break; 
-        case NT_READ: 
+            break;
+        case READ: 
             ast_nice_printReadNode(node, indent);
             break; 
-        case NT_WRITE:
+        case WRITE:
             ast_nice_printWriteNode(node, indent);
             break;
-        default:
-            printf("%s[Warning {%s}: Unknown node type \"%d\"]", ast_indentToStr(indent), __FUNCTION__,
-                node->type);
-    }
-}
-
-
-void ast_tree_printBody(node_t* const node, const unsigned char indent)
-{
-    node_t *curr = node->body;
-
-    while (curr) {
-        ast_tree_printNode(curr, indent);
-        curr = curr->next;
-    }
-}
-
-void ast_tree_printBodyNode(node_t* const node, const unsigned char indent)
-{
-    printf("%s- node-type: \"", ast_indentToStr(indent));
-    ast_printNodeType(node);
-    printf("\"\n%s  body:\n", ast_indentToStr(indent));
-    ast_tree_printBody(node, indent + 3);
-} 
-
-static inline void ast_tree_printTypeNode(node_t* const node, const unsigned char indent)
-{
-    printf("%s- node-type: \"", ast_indentToStr(indent));
-    ast_printNodeType(node);
-    printf("\"\n%s  strValue: \"%s\"\n", ast_indentToStr(indent), node->strValue);
-} 
-
-static inline void ast_tree_printIntConstNode(node_t* const node, const unsigned char indent)
-{
-    printf("%s- node-type: \"", ast_indentToStr(indent));
-    ast_printNodeType(node);
-    printf("\"\n%s  iValue: %d\n", ast_indentToStr(indent), node->iValue);
-} 
-
-static inline void ast_tree_printRealConstNode(node_t* const node, const unsigned char indent)
-{
-    printf("%s- node-type: \"", ast_indentToStr(indent));
-    ast_printNodeType(node);
-    printf("\"\n%s  iValue: %f\n", ast_indentToStr(indent), node->fValue);
-}
-
-static inline void ast_tree_printBoolConstNode(node_t* const node, const unsigned char indent)
-{
-    printf("%s- node-type: \"", ast_indentToStr(indent));
-    ast_printNodeType(node);
-    printf("\"\n%s  iValue: %d (\"%s\")\n", ast_indentToStr(indent), node->iValue,
-        node->iValue ? "TRUE" : "FALSE");
-} 
-
-static inline void ast_tree_printStringConstNode(node_t* const node, const unsigned char indent)
-{
-    printf("%s- node-type: \"", ast_indentToStr(indent));
-    ast_printNodeType(node);
-    printf("\"\n%s  strValue: %s\n", ast_indentToStr(indent), node->strValue);
-} 
-
-static inline void ast_tree_printIdentifierNode(node_t* const node, const unsigned char indent)
-{
-    printf("%s- node-type: \"", ast_indentToStr(indent));
-    ast_printNodeType(node);
-    printf("\"\n%s  strValue: \"%s\"\n", ast_indentToStr(indent), node->strValue);
-} 
-
-void ast_tree_printOpNode(node_t* const node, const unsigned char indent)
-{
-    printf("%s- node-type: \"", ast_indentToStr(indent));
-    ast_printNodeType(node);
-    printf("\"\n%s  iValue: %d (\"", ast_indentToStr(indent), node->iValue);
-    switch (node->iValue) {
-        case OP_PLUS:
-            printf("+");
-            break;
-        case OP_MINUS:
-            printf("-");
-            break;
-        case OP_MUL:
-            printf("*");
-            break;
-        case OP_DIV:
-            printf("/");
-            break;
-        case OP_MOD:
-            printf("mod");
-            break;
-        case OP_LT:
-            printf("<");
-            break;
-        case OP_LE:
-            printf("<=");
-            break;
-        case OP_GT:
-            printf(">");
-            break;
-        case OP_GE:
-            printf(">=");
-            break;
-        case OP_EQ:
-            printf("=");
-            break;
-        case OP_NE:
-            printf("<>");
-            break;
-        case OP_AND:
-            printf("and");
-            break;
-        case OP_OR:
-            printf("or");
-            break;
-    }
-    printf("\")\n");
-} 
-
-void ast_tree_print(ast_t* const ast)
-{
-    if (!ast) 
-        printf("Warning: Empty abstract syntax tree!\n");
-    else {
-        printf("---------------------------------Abstract syntax tree [tree]--------------------------"
-            "--------\n\n");
-        ast_tree_printNextNode(ast);
-        printf("\nNodes: %d\n", nodeCnt);
-    }
-}
-
-void ast_tree_printNextNode(node_t* const node)
-{
-    if (node->next) 
-        ast_tree_printNextNode(node->next);
-    ast_tree_printNode(node, 0);
-}
-
-void ast_tree_printNode(node_t* const node, const unsigned char indent)
-{
-    if (!node) {
-        printf("%s[Warning {%s}: Node is NULL!]", ast_indentToStr(indent), __FUNCTION__);
-        return;
-    }
-    nodeCnt++;
-    switch (node->type) {
-        case NT_LET: 
-        case NT_ASSIGN: 
-        case NT_IF: 
-        case NT_WHILE: 
-        case NT_FOR: 
-        case NT_STATEMENT: 
-        case NT_CONST: 
-        case NT_VAR: 
-        case NT_DECL_LIST:
-            ast_tree_printBodyNode(node, indent);
-            break;
-        case NT_TYPE: 
-            ast_tree_printTypeNode(node, indent);
+        case IF: 
+            ast_nice_printIfNode(node, indent);
             break; 
-        case NT_EXPR: 
-            ast_tree_printBodyNode(node, indent);
+        case WHILE: 
+            ast_nice_printWhileNode(node, indent);
             break; 
-        case NT_INT_CONST: 
-            ast_tree_printIntConstNode(node, indent);
+        case FOR: 
+            ast_nice_printForNode(node, indent);
             break; 
-        case NT_REAL_CONST: 
-            ast_tree_printRealConstNode(node, indent);
+        case STATEMENT: 
+            ast_nice_printStatementNode(node, indent);
             break; 
-        case NT_BOOL_CONST: 
-            ast_tree_printBoolConstNode(node, indent);
+        case CONST: 
+            ast_nice_printConstNode(node, indent);
             break; 
-        case NT_STRING_CONST:
-            ast_tree_printStringConstNode(node, indent);
+        case VAR: 
+            ast_nice_printVarNode(node, indent);
             break; 
-        case NT_IDENTIFIER: 
-            ast_tree_printIdentifierNode(node, indent);
+        case TYPE: 
+            ast_nice_printTypeNode(node, indent);
             break; 
-        case NT_ARRAY_IDENTIFIER: 
-            ast_tree_printBodyNode(node, indent);
+        case EXPR: 
+            ast_nice_printExprNode(node, indent);
             break; 
-        case NT_OP: 
-            ast_tree_printOpNode(node, indent);
+        case INT_CONST: 
+            ast_nice_printIntConstNode(node, indent);
             break; 
-        case NT_READ: 
-            ast_tree_printBodyNode(node, indent);
+        case REAL_CONST: 
+            ast_nice_printRealConstNode(node, indent);
             break; 
-        case NT_WRITE:
-            ast_tree_printBodyNode(node, indent);
-            break;
+        case BOOL_CONST: 
+            ast_nice_printBoolConstNode(node, indent);
+            break; 
+        case STRING_CONST:
+            ast_nice_printStringConstNode(node, indent);
+            break; 
+        case IDENTIFIER: 
+            ast_nice_printIdentifierNode(node, indent);
+            break; 
+        case ARRAY_IDENTIFIER: 
+            ast_nice_printArrayIdentifierNode(node, indent);
+            break; 
+        case OP: 
+            ast_nice_printOpNode(node, indent);
+            break; 
+        
         default:
             printf("%s[Warning {%s}: Unknown node type \"%d\"]", ast_indentToStr(indent), __FUNCTION__,
                 node->type);

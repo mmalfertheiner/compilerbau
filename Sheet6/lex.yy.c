@@ -1,5 +1,6 @@
+#line 2 "lex.yy.c"
 
-#line 3 "lex.yy.c"
+#line 4 "lex.yy.c"
 
 #define  YY_INT_ALIGNED short int
 
@@ -566,7 +567,7 @@ char *yytext;
 #include <string.h>
 #include "parser.tab.h"
 
-#line 570 "lex.yy.c"
+#line 571 "lex.yy.c"
 
 #define INITIAL 0
 
@@ -751,7 +752,7 @@ YY_DECL
 #line 25 "lexer.l"
 
 
-#line 755 "lex.yy.c"
+#line 756 "lex.yy.c"
 
 	if ( !(yy_init) )
 		{
@@ -1132,7 +1133,7 @@ YY_RULE_SETUP
 #line 86 "lexer.l"
 ECHO;
 	YY_BREAK
-#line 1136 "lex.yy.c"
+#line 1137 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 

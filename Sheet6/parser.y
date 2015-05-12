@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include "ast.h"
+#include "ast_print.h"
 
 #define YYERROR_VERBOSE
 
@@ -314,11 +315,20 @@ mulOp 			: 	Token_mult 			{ $$ = MUL; }
 
 %%
 
-int main() {
-	return yyparse();
+int yyerror(const char *s) {
+	errorFound = 1;
+  	fprintf(stderr, "%s at line: %d\n", s, yylineno);
+  	return 0;
 }
 
-int yyerror(const char *s) {
-  fprintf(stderr, "%s at line: %d\n", s, yylineno);
-  return 0;
+int main() {
+	yyparse();
+	if (errorFound)
+		printf("\n\nDone - Some errors occurred\n");
+	else
+		printf("\n\nDone - No errors\n");
+	ast_nice_print(ast);
+	printf("\n");
+
+	return 0;
 }

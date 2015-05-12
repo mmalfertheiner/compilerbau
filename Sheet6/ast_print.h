@@ -7,8 +7,7 @@
 #include "ast.h"
 
 /* Abstract-syntax-tree print-functions */
-void ast_print(ast_t* const ast);
-void ast_tree_print(ast_t* const ast);
-void ast_nice_print(ast_t* const ast);
+void ast_print(node_ast* const ast);
+void ast_nice_print(node_ast* const ast);
 
 #endif

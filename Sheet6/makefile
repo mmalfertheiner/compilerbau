@@ -1,10 +1,10 @@
 all: parser
 
 parser: lex.yy.c y.tab.c
-	gcc -g -O0 lex.yy.c parser.tab.c -o parser ast.c
+	gcc -g -O0 lex.yy.c parser.tab.c ast.c ast_print.c -o parser -ll
 
 lex.yy.c: y.tab.c lexer.l
-	lex lexer.l
+	lex -o lex.yy.c lexer.l
 
 y.tab.c: parser.y
 	bison -d --debug --verbose parser.y
