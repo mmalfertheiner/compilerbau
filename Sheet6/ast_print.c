@@ -160,10 +160,15 @@ void ast_nice_printProgramNode(node_ast* const node, const unsigned char indent)
     ast_nice_printNodeType();
     printf("\n%sPROGRAM ", ast_indentToStr(indent));
     ast_nice_printNodeTypeEx();
-    ast_nice_printBody(node->body, 0, "; ", TRUE);
-    printf(" IN BEGIN\n");
-    ast_nice_printNode(node->body ? node->body->next : NULL, indent + 3);
-    printf("%sEND;\n", ast_indentToStr(indent));
+    ast_nice_printBody(node->body, 0, "; ", FALSE);
+    ast_nice_printNode(node->body->next, indent + 3);
+    ast_nice_printNode(node->body->next->next, indent + 3);
+    if( node->body->next->next->next) {
+        printf("Test 2");
+        ast_nice_printNode(node->body->next->next->next, indent + 3);
+    }
+    
+    printf("%sEND.\n", ast_indentToStr(indent));
 } 
 
 void ast_nice_printAssignNode(node_ast* const node, const unsigned char indent)

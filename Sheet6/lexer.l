@@ -3,6 +3,13 @@
 #include <string.h>
 #include "parser.tab.h"
 
+char* yytextDup()
+{
+	char *res = (char*)malloc(strlen(yytext) + 1);
+	strcpy(res, yytext);
+	return res;
+}
+
 %}
 
 %option noyywrap
@@ -28,9 +35,9 @@ CloseCom				"*)"
 {Blanks}				
 {Tabs}							
 {OldComment}			
-{String}				return Token_String;
-{Integer}				return Token_Integer;
-{Real}					return Token_Real;
+{String}				{ yylval.identifier = yytextDup(); return Token_String; }
+{Integer}				{ yylval.iValue = atoi(yytext); return Token_Integer; }
+{Real}					{ yylval.fValue = atof(yytext); return Token_Real; }
 
 "integer"				return Token_integer;
 "real"					return Token_real;
@@ -47,7 +54,7 @@ CloseCom				"*)"
 "downto"				return Token_downTo;
 "else"					return Token_else;
 "end"					return Token_end;
-"false"					return Token_false;
+"false"					{ yylval.iValue = 0; return Token_false; }
 "for"					return Token_for;
 "if"					return Token_if;
 "repeat"				return Token_repeat;
@@ -60,7 +67,7 @@ CloseCom				"*)"
 "read"					return Token_read;
 "then"					return Token_then;
 "to"					return Token_to;
-"true"					return Token_true;
+"true"					{ yylval.iValue = 1; return Token_true; }
 "var"					return Token_var;
 "while"					return Token_while;
 "write"					return Token_write;
@@ -79,7 +86,7 @@ CloseCom				"*)"
 "]"						return Token_rRectBracket;
 "("						return Token_lBracket;
 ")"						return Token_rBracket;
-{Identifier}			return Token_identifier;
+{Identifier}			{ yylval.identifier = yytextDup(); return Token_identifier; }
 
 .						{ return Token_error; }
 

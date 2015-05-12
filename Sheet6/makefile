@@ -7,7 +7,7 @@ lex.yy.c: y.tab.c lexer.l
 	lex -o lex.yy.c lexer.l
 
 y.tab.c: parser.y
-	bison -d --debug --verbose parser.y
+	bison -d parser.y
 
 clean:
 	rm -f lex.yy.c y.tab.c y.tab.h parser
