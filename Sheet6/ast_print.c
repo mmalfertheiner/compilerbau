@@ -160,14 +160,13 @@ void ast_nice_printProgramNode(node_ast* const node, const unsigned char indent)
     ast_nice_printNodeType();
     printf("\n%sPROGRAM ", ast_indentToStr(indent));
     ast_nice_printNodeTypeEx();
-    ast_nice_printBody(node->body, 0, "; ", FALSE);
-    ast_nice_printNode(node->body->next, indent + 3);
-    ast_nice_printNode(node->body->next->next, indent + 3);
-    if( node->body->next->next->next) {
-        printf("Test 2");
-        ast_nice_printNode(node->body->next->next->next, indent + 3);
-    }
-    
+    ast_nice_printNode(node->body, 0);
+    printf(" ;\n");
+
+    ast_nice_printNode(node->body ? node->body->next : NULL, indent + 3);
+    ast_nice_printNode(node->body->next ? node->body->next->next : NULL, indent + 3);
+    printf(";\n");
+
     printf("%sEND.\n", ast_indentToStr(indent));
 } 
 
@@ -247,7 +246,11 @@ void ast_nice_printConstNode(node_ast* const node, const unsigned char indent)
     ast_nice_printNode(node->body, 0);
     printf(" = ");
     ast_nice_printNode(node->body ? node->body->next : NULL, 0);
-} 
+}
+
+void ast_nice_printVarListNode(node_ast* const node, const unsigned char indent) {
+    ast_nice_printNode(node->body, 0);
+}
 
 void ast_nice_printVarNode(node_ast* const node, const unsigned char indent)
 {
@@ -412,10 +415,13 @@ void ast_nice_printNode(node_ast* node, unsigned char indent)
             break; 
         case CONST: 
             ast_nice_printConstNode(node, indent);
-            break; 
+            break;
+        case VAR_LIST: 
+            ast_nice_printVarListNode(node, indent);
+            break;
         case VAR: 
             ast_nice_printVarNode(node, indent);
-            break; 
+            break;
         case TYPE: 
             ast_nice_printTypeNode(node, indent);
             break; 

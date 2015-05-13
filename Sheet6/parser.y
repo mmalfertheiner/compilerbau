@@ -119,14 +119,13 @@ int yydebug=1;
 
 
 start			:	Token_program Token_identifier 
-						Token_semicolon varDec compStmt Token_dot 		{ 	
-																			ast = ast_new_bodyNodeN(PROGRAM, 3, 
+						Token_semicolon varDec compStmt Token_dot 		{ ast = ast_new_bodyNodeN(PROGRAM, 3, 
 			 												   				ast_new_strNode(IDENTIFIER, $<identifier>2),
 																	   		$4, $5);
 																		}
 				;
 
-varDec 			:	Token_var varDecList								{ $$ = $2; }
+varDec 			:	Token_var varDecList								{ $$ = ast_new_bodyNode(VAR_LIST, $2); }
 				|	/* Epsilon */										{ $$ = NULL; }
 				;
 
