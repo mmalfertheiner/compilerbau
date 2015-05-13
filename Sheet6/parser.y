@@ -85,28 +85,7 @@ int yydebug=1;
 
 /*	Nonterminal types	*/
 %type <iValue> 	relOp addOp mulOp
-%type <body>	assignStmt
-				compStmt
-				elsePart
-				expr
-				exprList
-				factor
-				forStmt
-				identList
-				identListType
-				ifStmt
-				index
-				simpleExpr
-				simpleType
-				start
-				statement
-				stmtList
-				term
-				toPart
-				type
-				varDec
-				varDecList
-				whileStmt
+%type <body>	assignStmt compStmt elsePart expr exprList factor forStmt identList identListType ifStmt index simpleExpr simpleType start statement stmtList term toPart type varDec varDecList whileStmt
 
 
 
@@ -129,26 +108,21 @@ varDec 			:	Token_var varDecList								{ $$ = ast_new_bodyNode(VAR_LIST, $2); }
 				|	/* Epsilon */										{ $$ = NULL; }
 				;
 
-varDecList		:	varDecList identListType Token_semicolon			{ $$ = $1; 
+varDecList		:	varDecList identListType Token_semicolon			{ $$ = $1;
 																			ast_addNode($1, $2); 
 																		}
 				| 	identListType Token_semicolon						{ $$ = $1; }
 				;
 
 
-identListType	:	identList Token_colon type							{ $$ = $1;
-																			ast_addNode($1, $3);
-																		}
+identListType	:	identList Token_colon type							{ $$ = ast_new_bodyNodeN(IDENTIFIER_LIST, 2, $1, $3); }
 				;
 
 
 identList 		:	identList Token_comma Token_identifier 				{ $$ = $1;
-																			$$ = ast_new_bodyNodeN(VAR, 1, 
-																	   		ast_new_strNode(IDENTIFIER, $<identifier>3)); 
+																			ast_addNode($1, ast_new_strNode(IDENTIFIER, $<identifier>3));
 																		}
-				|	Token_identifier									{ $$ = ast_new_bodyNodeN(VAR, 1, 
-																	   		ast_new_strNode(IDENTIFIER, $<identifier>1)); 
-																		}
+				|	Token_identifier									{ $$ = ast_new_strNode(IDENTIFIER, $<identifier>1); }
 				;
 
 type 			:	simpleType
