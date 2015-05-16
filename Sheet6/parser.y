@@ -104,14 +104,14 @@ start			:	Token_program Token_identifier
 																		}
 				;
 
-varDec 			:	Token_var varDecList								{ $$ = ast_new_bodyNode(VAR_LIST, $2); }
+varDec 			:	Token_var varDecList								{ $$ = ast_new_bodyNode(VAR, $2); }
 				|	/* Epsilon */										{ $$ = NULL; }
 				;
 
 varDecList		:	varDecList identListType Token_semicolon			{ $$ = $1;
-																			ast_addNode($1, $2); 
+																			ast_addNode($1, ast_new_bodyNode(VAR_LIST, $2));
 																		}
-				| 	identListType Token_semicolon						{ $$ = $1; }
+				| 	identListType Token_semicolon						{ $$ = ast_new_bodyNode(VAR_LIST, $1);}
 				;
 
 
@@ -125,10 +125,10 @@ identList 		:	identList Token_comma Token_identifier 				{ $$ = $1;
 				|	Token_identifier									{ $$ = ast_new_strNode(IDENTIFIER, $<identifier>1); }
 				;
 
-type 			:	simpleType
+type 			:	simpleType											{ $$ = $1; }
 				|	Token_array Token_lRectBracket Token_Integer 
 					Token_dot Token_dot Token_Integer 
-					Token_rRectBracket Token_of simpleType				{ $$ = ast_new_bodyNodeN(VAR, 2, 
+					Token_rRectBracket Token_of simpleType				{ $$ = ast_new_bodyNodeN(TYPE, 2, 
 					 												   		ast_new_iNode(INT_CONST, $<iValue>3), $9);
 					 													}
 				;

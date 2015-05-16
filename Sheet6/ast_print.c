@@ -250,16 +250,14 @@ void ast_nice_printConstNode(node_ast* const node, const unsigned char indent)
 
 void ast_nice_printVarListNode(node_ast* const node, const unsigned char indent) {
     printf("VAR ");
-    ast_nice_printBody(node->body, 0, "; ", FALSE);
+    ast_nice_printBody(node->body, 0, ", ", FALSE);
 }
 
 void ast_nice_printVarNode(node_ast* const node, const unsigned char indent)
 {
     ast_nice_printNodeType();
-    printf("var node");
-    ast_nice_printBody(node->body, 0, "", FALSE);
-    printf(": ");
-    ast_nice_printNode(node->body ? node->body->next : NULL, 0);
+    printf("VAR ");
+    ast_nice_printBody(node->body, 0, ";", FALSE);
 } 
 
 void ast_nice_printTypeNode(node_ast* const node, const unsigned char indent)
@@ -300,7 +298,11 @@ void ast_nice_printStringConstNode(node_ast* const node, const unsigned char ind
 
 void ast_nice_printIdentifierList(node_ast* const node, const unsigned char indent)
 {
-    printf("identifier list");
+    ast_nice_printNode(node->body ,0);
+    ast_nice_printNode(node->body->next ,0);
+    ast_nice_printNode(node->body->next->next ,0);
+    ast_nice_printNode(node->body->next->next->next ,0);
+    
 } 
 
 void ast_nice_printIdentifierNode(node_ast* const node, const unsigned char indent)
