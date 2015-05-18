@@ -114,7 +114,11 @@ varDecList		:	varDecList identListType Token_semicolon			{ $$ = $1;
 				| 	identListType Token_semicolon						{ $$ = ast_new_bodyNode(VAR_LIST, $1);}
 				;
 
-
+// Mir brauchen do a nuien Typ IDENT_LIST_TYPE
+				//Die IDENTIFIER_LIST terf lei di identifier entholten und net a no in TYPE, wia ollaweil
+				//i denk a an so wos ca: $$ = ast_new_bodyNodeN(IDENT_LIST_TYPE, 2, ast_new_bodyNode(IDENTIFIER_LIST, $1), $3));
+				//des miast man donn a no in printer definieren, ober sem findsch schun
+				//gonz sicher bin i mor do ober a net :)
 identListType	:	identList Token_colon type							{ $$ = ast_new_bodyNodeN(IDENTIFIER_LIST, 2, $1, $3); }
 				;
 
