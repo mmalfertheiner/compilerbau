@@ -1622,7 +1622,7 @@ yyreduce:
 
   case 15:
 #line 144 "parser.y"
-    { (yyval.body) = (yyvsp[(2) - (3)].body); ;}
+    { (yyval.body) = ast_new_bodyNode(COMP_STMT, (yyvsp[(2) - (3)].body)); ;}
     break;
 
   case 16:
@@ -1630,6 +1630,36 @@ yyreduce:
     { (yyval.body) = (yyvsp[(1) - (3)].body);
 																					ast_addNode((yyvsp[(1) - (3)].body), (yyvsp[(3) - (3)].body));
 																				;}
+    break;
+
+  case 17:
+#line 152 "parser.y"
+    { (yyval.body) = (yyvsp[(1) - (1)].body); ;}
+    break;
+
+  case 18:
+#line 157 "parser.y"
+    { (yyval.body) = (yyvsp[(1) - (1)].body); ;}
+    break;
+
+  case 19:
+#line 158 "parser.y"
+    { (yyval.body) = (yyvsp[(1) - (1)].body); ;}
+    break;
+
+  case 20:
+#line 159 "parser.y"
+    { (yyval.body) = (yyvsp[(1) - (1)].body); ;}
+    break;
+
+  case 21:
+#line 160 "parser.y"
+    { (yyval.body) = (yyvsp[(1) - (1)].body); ;}
+    break;
+
+  case 22:
+#line 161 "parser.y"
+    { (yyval.body) = (yyvsp[(1) - (1)].body); ;}
     break;
 
   case 23:
@@ -1861,7 +1891,7 @@ yyreduce:
 
 
 /* Line 1267 of yacc.c.  */
-#line 1865 "parser.tab.c"
+#line 1895 "parser.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);

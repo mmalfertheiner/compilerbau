@@ -141,7 +141,7 @@ simpleType		:	Token_integer										{ $$ = ast_new_strNode(TYPE, "integer"); }
 
 
 
-compStmt		:	Token_begin stmtList Token_end								{ $$ = $2; }
+compStmt		:	Token_begin stmtList Token_end								{ $$ = ast_new_bodyNode(COMP_STMT, $2); }
 				;
 
 
@@ -149,16 +149,16 @@ compStmt		:	Token_begin stmtList Token_end								{ $$ = $2; }
 stmtList		:	stmtList Token_semicolon statement							{ $$ = $1;
 																					ast_addNode($1, $3);
 																				}
-				| 	statement
+				| 	statement													{ $$ = $1; }
 				;
 
 
 
-statement		:	assignStmt
-				| 	compStmt
-				| 	ifStmt
-				| 	whileStmt
-				| 	forStmt
+statement		:	assignStmt													{ $$ = $1; }
+				| 	compStmt													{ $$ = $1; }
+				| 	ifStmt														{ $$ = $1; }
+				| 	whileStmt													{ $$ = $1; }
+				| 	forStmt														{ $$ = $1; }
 				| 	Token_read Token_lBracket exprList Token_rBracket			{ $$ = ast_new_bodyNode(READ, $3); }
 				| 	Token_write Token_lBracket exprList Token_rBracket			{ $$ = ast_new_bodyNode(WRITE, $3); }
 				;

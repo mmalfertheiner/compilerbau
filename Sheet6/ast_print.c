@@ -71,6 +71,9 @@ void ast_printNodeType(node_ast* const node)
         case FOR:
             printf("FOR");
             break;
+        case COMP_STMT:
+            printf("COMP_STMT");
+            break;
         case STATEMENT:
             printf("STATEMENT");
             break;
@@ -243,7 +246,15 @@ void ast_nice_printWriteNode(node_ast* const node, const unsigned char indent)
     printf("WRITE ");
     ast_nice_printBody(node, 0, ", ", TRUE);
     printf(";\n");
-} 
+}
+
+void ast_nice_printCompStmtNode(node_ast* const node, const unsigned char indent)
+{
+    ast_nice_printNodeType();
+    printf("BEGIN\n");
+    ast_nice_printBody(node, indent, ";\n", TRUE);
+    printf("END\n");
+}
 
 void ast_nice_printStatementNode(node_ast* const node, const unsigned char indent)
 {    
@@ -443,7 +454,10 @@ void ast_nice_printNode(node_ast* node, unsigned char indent)
             break; 
         case FOR: 
             ast_nice_printForNode(node, indent);
-            break; 
+            break;
+        case COMP_STMT:
+            ast_nice_printCompStmtNode(node, indent);
+            break;
         case STATEMENT: 
             ast_nice_printStatementNode(node, indent);
             break; 
