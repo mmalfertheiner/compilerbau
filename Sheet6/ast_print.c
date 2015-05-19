@@ -288,6 +288,14 @@ void ast_nice_printExprNode(node_ast* const node, const unsigned char indent)
     ast_nice_printBody(node, 0, " ", TRUE);
 } 
 
+void ast_nice_printBracketExprNode(node_ast* const node, const unsigned char indent)
+{
+    ast_nice_printNodeType();
+    printf("(");
+    ast_nice_printBody(node, 0, " ", TRUE);
+    printf(")");
+} 
+
 void ast_nice_printIntConstNode(node_ast* const node, const unsigned char indent)
 {
     ast_nice_printNodeType();
@@ -468,7 +476,10 @@ void ast_nice_printNode(node_ast* node, unsigned char indent)
             break; 
         case EXPR: 
             ast_nice_printExprNode(node, indent);
-            break; 
+            break;
+        case BRACKET_EXPR:
+            ast_nice_printBracketExprNode(node, indent);
+            break;
         case INT_CONST: 
             ast_nice_printIntConstNode(node, indent);
             break; 

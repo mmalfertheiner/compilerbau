@@ -257,7 +257,7 @@ factor 			:	Token_Integer 							{ $$ = ast_new_iNode(INT_CONST, $<iValue>1);}
 															}
 				| 	Token_not factor  						{ $$ = ast_new_bodyNode(FACTOR, $2);}
 				| 	Token_sub factor 						{ $$ = ast_new_bodyNode(FACTOR, $2); }
-				| 	Token_lBracket expr Token_rBracket 		{ $$ = ast_new_bodyNode(EXPR, $2); }
+				| 	Token_lBracket expr Token_rBracket 		{ $$ = ast_new_bodyNode(BRACKET_EXPR, $2); }
 				;
 
 
