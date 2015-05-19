@@ -196,12 +196,12 @@ void ast_nice_printIfNode(node_ast* const node, const unsigned char indent)
     ast_nice_printNodeType();
     printf("IF (");
     ast_nice_printNode(node->body, 0);
-    printf(") THEN BEGIN\n");
+    printf(") THEN\n");
     ast_nice_printNode(node->body ? node->body->next : NULL, indent + 3);
     if (node->body && node->body->next && node->body->next->next) {
-        printf("%sEND\n%sELSE BEGIN\n", ast_indentToStr(indent), ast_indentToStr(indent));
+        printf("\n%sELSE\n", ast_indentToStr(indent));
         ast_nice_printNode(node->body->next->next, indent + 3);
-        printf("%sEND;\n", ast_indentToStr(indent));
+        printf("\n");
     }
     else
         printf("%sEND;\n", ast_indentToStr(indent));
@@ -212,9 +212,9 @@ void ast_nice_printWhileNode(node_ast* const node, const unsigned char indent)
     ast_nice_printNodeType();
     printf("WHILE (");
     ast_nice_printNode(node->body, 0);
-    printf(") DO BEGIN\n");
+    printf(") DO\n");
     ast_nice_printNode(node->body ? node->body->next : NULL, indent + 3);
-    printf("%sEND;\n", ast_indentToStr(indent));
+    printf("\n");
 } 
 
 void ast_nice_printForNode(node_ast* const node, const unsigned char indent)
@@ -226,10 +226,10 @@ void ast_nice_printForNode(node_ast* const node, const unsigned char indent)
     ast_nice_printNode(node->body ? node->body->next : NULL, 0);
     printf(" TO ");
     ast_nice_printNode(node->body && node->body->next ? node->body->next->next : NULL, 0);
-    printf(" DO BEGIN\n");
+    printf(" DO\n");
     ast_nice_printNode(node->body && node->body->next && node->body->next->next ? 
         node->body->next->next->next : NULL, indent + 3);
-    printf("%sEND;\n", ast_indentToStr(indent));
+    printf("\n");
 } 
 
 void ast_nice_printReadNode(node_ast* const node, const unsigned char indent)
