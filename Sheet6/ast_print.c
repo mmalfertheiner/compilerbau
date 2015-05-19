@@ -179,42 +179,36 @@ void ast_nice_printProgramNode(node_ast* const node, const unsigned char indent)
 
     ast_nice_printNode(node->body ? node->body->next : NULL, indent + 3);
     ast_nice_printNode(node->body->next ? node->body->next->next : NULL, indent);
-    printf(";\n");
 
-    printf("%sEND.\n", ast_indentToStr(indent));
+    printf("%s.\n", ast_indentToStr(indent));
 } 
 
 void ast_nice_printAssignNode(node_ast* const node, const unsigned char indent)
 {
     ast_nice_printNodeType();
     ast_nice_printBodyEx(node, 0, " := ", 4);
-    printf(";\n");
 } 
 
 void ast_nice_printIfNode(node_ast* const node, const unsigned char indent)
 {
     ast_nice_printNodeType();
-    printf("IF (");
+    printf("IF ");
     ast_nice_printNode(node->body, 0);
-    printf(") THEN\n");
+    printf(" THEN\n");
     ast_nice_printNode(node->body ? node->body->next : NULL, indent + 3);
     if (node->body && node->body->next && node->body->next->next) {
         printf("\n%sELSE\n", ast_indentToStr(indent));
         ast_nice_printNode(node->body->next->next, indent + 3);
-        printf("\n");
     }
-    else
-        printf("%sEND;\n", ast_indentToStr(indent));
 } 
 
 void ast_nice_printWhileNode(node_ast* const node, const unsigned char indent)
 {
     ast_nice_printNodeType();
-    printf("WHILE (");
+    printf("WHILE ");
     ast_nice_printNode(node->body, 0);
-    printf(") DO\n");
+    printf(" DO\n");
     ast_nice_printNode(node->body ? node->body->next : NULL, indent + 3);
-    printf("\n");
 } 
 
 void ast_nice_printForNode(node_ast* const node, const unsigned char indent)
@@ -229,7 +223,6 @@ void ast_nice_printForNode(node_ast* const node, const unsigned char indent)
     printf(" DO\n");
     ast_nice_printNode(node->body && node->body->next && node->body->next->next ? 
         node->body->next->next->next : NULL, indent + 3);
-    printf("\n");
 } 
 
 void ast_nice_printReadNode(node_ast* const node, const unsigned char indent)
@@ -237,27 +230,28 @@ void ast_nice_printReadNode(node_ast* const node, const unsigned char indent)
     ast_nice_printNodeType();
     printf("READ (");
     ast_nice_printBody(node, 0, ", ", TRUE);
-    printf(");\n");
+    printf(")");
 } 
 
 void ast_nice_printWriteNode(node_ast* const node, const unsigned char indent)
 {
     ast_nice_printNodeType();
-    printf("WRITE ");
+    printf("WRITE (");
     ast_nice_printBody(node, 0, ", ", TRUE);
-    printf(";\n");
+    printf(")");
 }
 
 void ast_nice_printCompStmtNode(node_ast* const node, const unsigned char indent)
 {
     ast_nice_printNodeType();
     printf("BEGIN\n");
-    ast_nice_printBody(node, indent, ";\n", TRUE);
-    printf("END\n");
+    ast_nice_printBody(node, indent+3, ";\n", TRUE);
+    printf("%s\nEND", ast_indentToStr(indent+3));
 }
 
 void ast_nice_printStatementNode(node_ast* const node, const unsigned char indent)
-{    
+{   
+    ast_nice_printNodeType(); 
     ast_nice_printBody(node, indent, "", TRUE);
 } 
 
@@ -266,7 +260,7 @@ void ast_nice_printConstNode(node_ast* const node, const unsigned char indent)
     ast_nice_printNodeType();
     printf("CONST ");
     ast_nice_printNode(node->body, 0);
-    printf(" = ");
+    printf("=");
     ast_nice_printNode(node->body ? node->body->next : NULL, 0);
 }
 
@@ -291,7 +285,7 @@ void ast_nice_printTypeNode(node_ast* const node, const unsigned char indent)
 void ast_nice_printExprNode(node_ast* const node, const unsigned char indent)
 {
     ast_nice_printNodeType();
-    ast_nice_printBody(node, indent, ", ", TRUE);
+    ast_nice_printBody(node, 0, " ", TRUE);
 } 
 
 void ast_nice_printIntConstNode(node_ast* const node, const unsigned char indent)
@@ -309,7 +303,7 @@ void ast_nice_printRealConstNode(node_ast* const node, const unsigned char inden
 void ast_nice_printBoolConstNode(node_ast* const node, const unsigned char indent)
 {
     ast_nice_printNodeType();
-    printf("%s", node->iValue ? "TRUE" : "FALSE");
+    printf("%s", node->iValue == 1 ? "TRUE" : "FALSE");
 } 
 
 void ast_nice_printStringConstNode(node_ast* const node, const unsigned char indent)
@@ -361,43 +355,43 @@ void ast_nice_printOpNode(node_ast* const node, const unsigned char indent)
     ast_nice_printNodeType();
     switch (node->iValue) {
         case PLUS:
-            printf(" + ");
+            printf("+");
             break;
         case MINUS:
-            printf(" - ");
+            printf("-");
             break;
         case MUL:
-            printf(" * ");
+            printf("*");
             break;
         case DIV:
-            printf(" / ");
+            printf("/");
             break;
         case MOD:
-            printf(" mod ");
+            printf("MOD");
             break;
         case LT:
-            printf(" < ");
+            printf("<");
             break;
         case LE:
-            printf(" <= ");
+            printf("<=");
             break;
         case GT:
-            printf(" > ");
+            printf(">");
             break;
         case GE:
-            printf(" >= ");
+            printf(">=");
             break;
         case EQ:
-            printf(" = ");
+            printf("=");
             break;
         case NE:
-            printf(" <> ");
+            printf("<>");
             break;
         case AND:
-            printf(" and ");
+            printf("AND");
             break;
         case OR:
-            printf(" or ");
+            printf("OR");
             break;
     }
 } 
@@ -410,7 +404,6 @@ void ast_nice_print(node_ast* ast)
         printf("\n---------------------------------Abstract syntax tree [nice]--------------------------"
             "--------\n\n");
         ast_nice_printNextNode(ast);
-        printf(".\n\n");
     }
 }
 

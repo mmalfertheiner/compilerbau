@@ -247,8 +247,8 @@ term			:	term mulOp factor						{ $$ = ast_new_bodyNodeN(EXPR, 3, $1,
 factor 			:	Token_Integer 							{ $$ = ast_new_iNode(INT_CONST, $<iValue>1);}
 				| 	Token_Real 								{ $$ = ast_new_fNode(REAL_CONST, $<fValue>1);	}
 				|	Token_String 							{ $$ = ast_new_strNode(STRING_CONST, $<identifier>1);}
-				|	Token_false 							{ $$ = ast_new_iNode(Token_false, $<iValue>0);}
-				|	Token_true 								{ $$ = ast_new_iNode(Token_true, $<iValue>1); }
+				|	Token_false 							{ $$ = ast_new_iNode(BOOL_CONST, $<iValue>1);}
+				|	Token_true 								{ $$ = ast_new_iNode(BOOL_CONST, $<iValue>1);}
 				|	Token_identifier						{ $$ = ast_new_strNode(IDENTIFIER, $<identifier>1); }
 				|	Token_identifier index  				{ $$ = ast_new_bodyNodeN(ARRAY_IDENTIFIER, 2,
 																	   		ast_new_strNode(Token_identifier, $<identifier>1),

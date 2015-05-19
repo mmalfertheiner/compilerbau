@@ -1782,12 +1782,12 @@ yyreduce:
 
   case 46:
 #line 250 "parser.y"
-    { (yyval.body) = ast_new_iNode(Token_false, (yyvsp[(0) - (1)].iValue));;}
+    { (yyval.body) = ast_new_iNode(BOOL_CONST, (yyvsp[(1) - (1)].iValue));;}
     break;
 
   case 47:
 #line 251 "parser.y"
-    { (yyval.body) = ast_new_iNode(Token_true, (yyvsp[(1) - (1)].iValue)); ;}
+    { (yyval.body) = ast_new_iNode(BOOL_CONST, (yyvsp[(1) - (1)].iValue));;}
     break;
 
   case 48:
