@@ -4,7 +4,7 @@
 
 program minipas;
 
-  var x, y, i: integer;      
+  var x, y, i: integer;
       a: array [1..100] of real;
 
   begin

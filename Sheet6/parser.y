@@ -104,22 +104,17 @@ start			:	Token_program Token_identifier
 																		}
 				;
 
-varDec 			:	Token_var varDecList								{ $$ = ast_new_bodyNode(VAR, $2); }
+varDec 			:	Token_var varDecList								{ $$ = ast_new_bodyNode(VAR_LIST, $2); }
 				|	/* Epsilon */										{ $$ = NULL; }
 				;
 
 varDecList		:	varDecList identListType Token_semicolon			{ $$ = $1;
-																			ast_addNode($1, ast_new_bodyNode(VAR_LIST, $2));
+																			ast_addNode($1, ast_new_bodyNode(VAR, $2));
 																		}
-				| 	identListType Token_semicolon						{ $$ = ast_new_bodyNode(VAR_LIST, $1);}
+				| 	identListType Token_semicolon						{ $$ = ast_new_bodyNode(VAR, $1);}
 				;
 
-// Mir brauchen do a nuien Typ IDENT_LIST_TYPE
-				//Die IDENTIFIER_LIST terf lei di identifier entholten und net a no in TYPE, wia ollaweil
-				//i denk a an so wos ca: $$ = ast_new_bodyNodeN(IDENT_LIST_TYPE, 2, ast_new_bodyNode(IDENTIFIER_LIST, $1), $3));
-				//des miast man donn a no in printer definieren, ober sem findsch schun
-				//gonz sicher bin i mor do ober a net :)
-identListType	:	identList Token_colon type							{ $$ = ast_new_bodyNodeN(IDENTIFIER_LIST, 2, $1, $3); }
+identListType	:	identList Token_colon type							{ $$ = ast_new_bodyNodeN(IDENT_LIST_TYPE, 2, ast_new_bodyNode(IDENTIFIER_LIST, $1), $3); }
 				;
 
 
@@ -132,8 +127,8 @@ identList 		:	identList Token_comma Token_identifier 				{ $$ = $1;
 type 			:	simpleType											{ $$ = $1; }
 				|	Token_array Token_lRectBracket Token_Integer 
 					Token_dot Token_dot Token_Integer 
-					Token_rRectBracket Token_of simpleType				{ $$ = ast_new_bodyNodeN(TYPE, 2, 
-					 												   		ast_new_iNode(INT_CONST, $<iValue>3), $9);
+					Token_rRectBracket Token_of simpleType				{
+																			$$ = ast_new_bodyNodeN(ARRAY_TYPE, 3, ast_new_iNode(INT_CONST, $<iValue>3), ast_new_iNode(INT_CONST, $<iValue>6), $9);
 					 													}
 				;
 
