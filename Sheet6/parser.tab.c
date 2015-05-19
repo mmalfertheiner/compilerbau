@@ -1709,6 +1709,11 @@ yyreduce:
 															;}
     break;
 
+  case 36:
+#line 218 "parser.y"
+    { (yyval.body) = (yyvsp[(1) - (1)].body);;}
+    break;
+
   case 37:
 #line 223 "parser.y"
     { (yyval.body) = ast_new_bodyNodeN(EXPR, 3, (yyvsp[(1) - (3)].body), 
@@ -1757,7 +1762,7 @@ yyreduce:
 
   case 48:
 #line 252 "parser.y"
-    { (yyval.body) = ast_new_strNode(Token_identifier, (yyvsp[(1) - (1)].identifier)); ;}
+    { (yyval.body) = ast_new_strNode(IDENTIFIER, (yyvsp[(1) - (1)].identifier)); ;}
     break;
 
   case 49:
@@ -1856,7 +1861,7 @@ yyreduce:
 
 
 /* Line 1267 of yacc.c.  */
-#line 1860 "parser.tab.c"
+#line 1865 "parser.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);

@@ -175,7 +175,7 @@ void ast_nice_printProgramNode(node_ast* const node, const unsigned char indent)
     printf(" ;\n");
 
     ast_nice_printNode(node->body ? node->body->next : NULL, indent + 3);
-    ast_nice_printNode(node->body->next ? node->body->next->next : NULL, indent + 3);
+    ast_nice_printNode(node->body->next ? node->body->next->next : NULL, indent);
     printf(";\n");
 
     printf("%sEND.\n", ast_indentToStr(indent));
@@ -232,9 +232,9 @@ void ast_nice_printForNode(node_ast* const node, const unsigned char indent)
 void ast_nice_printReadNode(node_ast* const node, const unsigned char indent)
 {
     ast_nice_printNodeType();
-    printf("READ ");
+    printf("READ (");
     ast_nice_printBody(node, 0, ", ", TRUE);
-    printf(";\n");
+    printf(");\n");
 } 
 
 void ast_nice_printWriteNode(node_ast* const node, const unsigned char indent)
@@ -280,7 +280,7 @@ void ast_nice_printTypeNode(node_ast* const node, const unsigned char indent)
 void ast_nice_printExprNode(node_ast* const node, const unsigned char indent)
 {
     ast_nice_printNodeType();
-    ast_nice_printBody(node, indent, "", TRUE);
+    ast_nice_printBody(node, indent, ", ", TRUE);
 } 
 
 void ast_nice_printIntConstNode(node_ast* const node, const unsigned char indent)
@@ -343,7 +343,7 @@ void ast_nice_printArrayIdentifierNode(node_ast* const node, const unsigned char
     printf("%s[", node->body->identifier);
     ast_nice_printNode(node->body->next, 0);
     printf("]");
-} 
+}
 
 void ast_nice_printOpNode(node_ast* const node, const unsigned char indent)
 {
