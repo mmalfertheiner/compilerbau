@@ -32,27 +32,27 @@ node_ast* ast_new_rawNode(node_type type)
 	return node;
 }
 
-node_ast* ast_new_iNode(node_type type, int iValue)
+node_ast* ast_new_iNode(ast_t* ast, node_type type, int iValue)
 {
 	node_ast *node = ast_new_rawNode(type);
 
-	//node->iValue = iValue;
+	symtab_insert(ast->currScope->symTab, ET_CONST, DT_INT, &iValue, NULL);
 	return node;
 }	
 
-node_ast* ast_new_fNode(node_type type, float fValue)
+node_ast* ast_new_fNode(ast_t* ast, node_type type, float fValue)
 {
 	node_ast *node = ast_new_rawNode(type);
 
-	//node->fValue = fValue;
+	symtab_insert(ast->currScope->symTab, ET_CONST, DT_REAL, &fValue, NULL);
 	return node;
 }
 
-node_ast* ast_new_strNode(node_type type, char* str)
+node_ast* ast_new_strNode(ast_t* ast, node_type type, char* str)
 {
 	node_ast *node = ast_new_rawNode(type);
 
-	//node->identifier = str;
+	symtab_insert(ast->currScope->symTab, ET_CONST, DT_STRING, &str, NULL);
 	return node;
 }
 

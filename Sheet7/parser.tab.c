@@ -1550,7 +1550,7 @@ yyreduce:
         case 2:
 #line 102 "parser.y"
     { root = ast_new_bodyNodeN(PROGRAM, 3, 
-			 												   				ast_new_strNode(IDENTIFIER, (yyvsp[(2) - (6)].identifier)),
+			 												   				ast_new_strNode(ast, IDENTIFIER, (yyvsp[(2) - (6)].identifier)),
 																	   		(yyvsp[(4) - (6)].body), (yyvsp[(5) - (6)].body));
 
 																			ast_setRoot(ast, root);
@@ -1587,13 +1587,13 @@ yyreduce:
   case 8:
 #line 124 "parser.y"
     { (yyval.body) = (yyvsp[(1) - (3)].body);
-																			ast_addNode((yyvsp[(1) - (3)].body), ast_new_strNode(IDENTIFIER, (yyvsp[(3) - (3)].identifier)));
+																			ast_addNode((yyvsp[(1) - (3)].body), ast_new_strNode(ast, IDENTIFIER, (yyvsp[(3) - (3)].identifier)));
 																		;}
     break;
 
   case 9:
 #line 127 "parser.y"
-    { (yyval.body) = ast_new_strNode(IDENTIFIER, (yyvsp[(1) - (1)].identifier)); ;}
+    { (yyval.body) = ast_new_strNode(ast, IDENTIFIER, (yyvsp[(1) - (1)].identifier)); ;}
     break;
 
   case 10:
@@ -1604,23 +1604,23 @@ yyreduce:
   case 11:
 #line 133 "parser.y"
     {
-																			(yyval.body) = ast_new_bodyNodeN(ARRAY_TYPE, 3, ast_new_iNode(INT_CONST, (yyvsp[(3) - (9)].iValue)), ast_new_iNode(INT_CONST, (yyvsp[(6) - (9)].iValue)), (yyvsp[(9) - (9)].body));
+																			(yyval.body) = ast_new_bodyNodeN(ARRAY_TYPE, 3, ast_new_iNode(ast, INT_CONST, (yyvsp[(3) - (9)].iValue)), ast_new_iNode(ast, INT_CONST, (yyvsp[(6) - (9)].iValue)), (yyvsp[(9) - (9)].body));
 					 													;}
     break;
 
   case 12:
 #line 140 "parser.y"
-    { (yyval.body) = ast_new_strNode(TYPE, "integer"); ;}
+    { (yyval.body) = ast_new_strNode(ast, TYPE, "integer"); ;}
     break;
 
   case 13:
 #line 141 "parser.y"
-    { (yyval.body) = ast_new_strNode(TYPE, "real"); ;}
+    { (yyval.body) = ast_new_strNode(ast, TYPE, "real"); ;}
     break;
 
   case 14:
 #line 142 "parser.y"
-    { (yyval.body) = ast_new_strNode(TYPE, "string"); ;}
+    { (yyval.body) = ast_new_strNode(ast, TYPE, "string"); ;}
     break;
 
   case 15:
@@ -1678,7 +1678,7 @@ yyreduce:
   case 25:
 #line 169 "parser.y"
     { (yyval.body) = ast_new_bodyNodeN(ASSIGN, 2, 
-																						ast_new_strNode(IDENTIFIER, (yyvsp[(1) - (3)].identifier)), (yyvsp[(3) - (3)].body));
+																						ast_new_strNode(ast, IDENTIFIER, (yyvsp[(1) - (3)].identifier)), (yyvsp[(3) - (3)].body));
 																				;}
     break;
 
@@ -1686,7 +1686,7 @@ yyreduce:
 #line 172 "parser.y"
     { (yyval.body) = ast_new_bodyNodeN(ASSIGN, 2, 	
 																				   		ast_new_bodyNodeN(ARRAY_IDENTIFIER, 2,
-																				       		 ast_new_strNode(IDENTIFIER, 
+																				       		 ast_new_strNode(ast, IDENTIFIER, 
 																				   	   		 (yyvsp[(1) - (4)].identifier))
 																				   	   		 , (yyvsp[(2) - (4)].body))
 																				   		, (yyvsp[(4) - (4)].body));
@@ -1721,18 +1721,18 @@ yyreduce:
   case 32:
 #line 205 "parser.y"
     { (yyval.body) = ast_new_bodyNodeN(FOR, 4,
-					 												   ast_new_strNode(IDENTIFIER, (yyvsp[(2) - (8)].identifier)),
+					 												   ast_new_strNode(ast, IDENTIFIER, (yyvsp[(2) - (8)].identifier)),
 																	   (yyvsp[(4) - (8)].body), (yyvsp[(6) - (8)].body), (yyvsp[(8) - (8)].body)); ;}
     break;
 
   case 33:
 #line 212 "parser.y"
-    { (yyval.body) = ast_new_strNode(CONST, "to"); ;}
+    { (yyval.body) = ast_new_strNode(ast, CONST, "to"); ;}
     break;
 
   case 34:
 #line 213 "parser.y"
-    { (yyval.body) = ast_new_strNode(CONST, "downto"); ;}
+    { (yyval.body) = ast_new_strNode(ast, CONST, "downto"); ;}
     break;
 
   case 35:
@@ -1750,58 +1750,58 @@ yyreduce:
   case 37:
 #line 226 "parser.y"
     { (yyval.body) = ast_new_bodyNodeN(EXPR, 3, (yyvsp[(1) - (3)].body), 
-																		ast_new_iNode(OP, (yyvsp[(2) - (3)].iValue)), (yyvsp[(3) - (3)].body));
+																		ast_new_iNode(ast, OP, (yyvsp[(2) - (3)].iValue)), (yyvsp[(3) - (3)].body));
 															;}
     break;
 
   case 39:
 #line 234 "parser.y"
     { (yyval.body) = ast_new_bodyNodeN(EXPR, 3, (yyvsp[(1) - (3)].body), 
-																	   ast_new_iNode(OP, (yyvsp[(2) - (3)].iValue)), (yyvsp[(3) - (3)].body));
+																	   ast_new_iNode(ast, OP, (yyvsp[(2) - (3)].iValue)), (yyvsp[(3) - (3)].body));
 															;}
     break;
 
   case 41:
 #line 242 "parser.y"
     { (yyval.body) = ast_new_bodyNodeN(EXPR, 3, (yyvsp[(1) - (3)].body), 
-																	   ast_new_iNode(OP, (yyvsp[(2) - (3)].iValue)), (yyvsp[(3) - (3)].body));
+																	   ast_new_iNode(ast, OP, (yyvsp[(2) - (3)].iValue)), (yyvsp[(3) - (3)].body));
 															;}
     break;
 
   case 43:
 #line 250 "parser.y"
-    { (yyval.body) = ast_new_iNode(INT_CONST, (yyvsp[(1) - (1)].iValue));;}
+    { (yyval.body) = ast_new_iNode(ast, INT_CONST, (yyvsp[(1) - (1)].iValue));;}
     break;
 
   case 44:
 #line 251 "parser.y"
-    { (yyval.body) = ast_new_fNode(REAL_CONST, (yyvsp[(1) - (1)].fValue));	;}
+    { (yyval.body) = ast_new_fNode(ast, REAL_CONST, (yyvsp[(1) - (1)].fValue));	;}
     break;
 
   case 45:
 #line 252 "parser.y"
-    { (yyval.body) = ast_new_strNode(STRING_CONST, (yyvsp[(1) - (1)].identifier));;}
+    { (yyval.body) = ast_new_strNode(ast, STRING_CONST, (yyvsp[(1) - (1)].identifier));;}
     break;
 
   case 46:
 #line 253 "parser.y"
-    { (yyval.body) = ast_new_iNode(BOOL_CONST, (yyvsp[(1) - (1)].iValue));;}
+    { (yyval.body) = ast_new_iNode(ast, BOOL_CONST, (yyvsp[(1) - (1)].iValue));;}
     break;
 
   case 47:
 #line 254 "parser.y"
-    { (yyval.body) = ast_new_iNode(BOOL_CONST, (yyvsp[(1) - (1)].iValue));;}
+    { (yyval.body) = ast_new_iNode(ast, BOOL_CONST, (yyvsp[(1) - (1)].iValue));;}
     break;
 
   case 48:
 #line 255 "parser.y"
-    { (yyval.body) = ast_new_strNode(IDENTIFIER, (yyvsp[(1) - (1)].identifier)); ;}
+    { (yyval.body) = ast_new_strNode(ast, IDENTIFIER, (yyvsp[(1) - (1)].identifier)); ;}
     break;
 
   case 49:
 #line 256 "parser.y"
     { (yyval.body) = ast_new_bodyNodeN(ARRAY_IDENTIFIER, 2,
-																	   		ast_new_strNode(Token_identifier, (yyvsp[(1) - (2)].identifier)),
+																	   		ast_new_strNode(ast, Token_identifier, (yyvsp[(1) - (2)].identifier)),
 																	   		(yyvsp[(2) - (2)].body)
 																	   	);
 															;}

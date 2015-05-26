@@ -100,7 +100,7 @@ int yydebug=1;
 
 start			:	Token_program Token_identifier 
 						Token_semicolon varDec compStmt Token_dot 		{ root = ast_new_bodyNodeN(PROGRAM, 3, 
-			 												   				ast_new_strNode(IDENTIFIER, $<identifier>2),
+			 												   				ast_new_strNode(ast, IDENTIFIER, $<identifier>2),
 																	   		$4, $5);
 
 																			ast_setRoot(ast, root);
@@ -122,24 +122,24 @@ identListType	:	identList Token_colon type							{ $$ = ast_new_bodyNodeN(IDENT_
 
 
 identList 		:	identList Token_comma Token_identifier 				{ $$ = $1;
-																			ast_addNode($1, ast_new_strNode(IDENTIFIER, $<identifier>3));
+																			ast_addNode($1, ast_new_strNode(ast, IDENTIFIER, $<identifier>3));
 																		}
-				|	Token_identifier									{ $$ = ast_new_strNode(IDENTIFIER, $<identifier>1); }
+				|	Token_identifier									{ $$ = ast_new_strNode(ast, IDENTIFIER, $<identifier>1); }
 				;
 
 type 			:	simpleType											{ $$ = $1; }
 				|	Token_array Token_lRectBracket Token_Integer 
 					Token_dot Token_dot Token_Integer 
 					Token_rRectBracket Token_of simpleType				{
-																			$$ = ast_new_bodyNodeN(ARRAY_TYPE, 3, ast_new_iNode(INT_CONST, $<iValue>3), ast_new_iNode(INT_CONST, $<iValue>6), $9);
+																			$$ = ast_new_bodyNodeN(ARRAY_TYPE, 3, ast_new_iNode(ast, INT_CONST, $<iValue>3), ast_new_iNode(ast, INT_CONST, $<iValue>6), $9);
 					 													}
 				;
 
 
 
-simpleType		:	Token_integer										{ $$ = ast_new_strNode(TYPE, "integer"); }
-				|	Token_real											{ $$ = ast_new_strNode(TYPE, "real"); }
-				|	Token_string										{ $$ = ast_new_strNode(TYPE, "string"); }
+simpleType		:	Token_integer										{ $$ = ast_new_strNode(ast, TYPE, "integer"); }
+				|	Token_real											{ $$ = ast_new_strNode(ast, TYPE, "real"); }
+				|	Token_string										{ $$ = ast_new_strNode(ast, TYPE, "string"); }
 				;
 
 
@@ -167,11 +167,11 @@ statement		:	assignStmt													{ $$ = $1; }
 				;
 
 assignStmt		:	Token_identifier Token_assign expr 							{ $$ = ast_new_bodyNodeN(ASSIGN, 2, 
-																						ast_new_strNode(IDENTIFIER, $<identifier>1), $3);
+																						ast_new_strNode(ast, IDENTIFIER, $<identifier>1), $3);
 																				}
 				|	Token_identifier index Token_assign expr					{ $$ = ast_new_bodyNodeN(ASSIGN, 2, 	
 																				   		ast_new_bodyNodeN(ARRAY_IDENTIFIER, 2,
-																				       		 ast_new_strNode(IDENTIFIER, 
+																				       		 ast_new_strNode(ast, IDENTIFIER, 
 																				   	   		 $<identifier>1)
 																				   	   		 , $2)
 																				   		, $4);
@@ -203,14 +203,14 @@ whileStmt		:	Token_while expr Token_do statement			{ $$ = ast_new_bodyNodeN(WHIL
 
 forStmt 		:	Token_for Token_identifier Token_assign 
 						expr toPart expr Token_do statement   	{ $$ = ast_new_bodyNodeN(FOR, 4,
-					 												   ast_new_strNode(IDENTIFIER, $<identifier>2),
+					 												   ast_new_strNode(ast, IDENTIFIER, $<identifier>2),
 																	   $4, $6, $8); }
 				;
 
 
 
-toPart			:	Token_to								{ $$ = ast_new_strNode(CONST, "to"); }
-				| 	Token_downTo							{ $$ = ast_new_strNode(CONST, "downto"); }
+toPart			:	Token_to								{ $$ = ast_new_strNode(ast, CONST, "to"); }
+				| 	Token_downTo							{ $$ = ast_new_strNode(ast, CONST, "downto"); }
 				;
 
 
@@ -224,7 +224,7 @@ exprList		:	exprList Token_comma expr 				{ $$ = $1;
 
 
 expr 			:	simpleExpr relOp simpleExpr				{ $$ = ast_new_bodyNodeN(EXPR, 3, $1, 
-																		ast_new_iNode(OP, $2), $3);
+																		ast_new_iNode(ast, OP, $2), $3);
 															}
 				|	simpleExpr
 				;
@@ -232,7 +232,7 @@ expr 			:	simpleExpr relOp simpleExpr				{ $$ = ast_new_bodyNodeN(EXPR, 3, $1,
 
 
 simpleExpr 		:	simpleExpr addOp term					{ $$ = ast_new_bodyNodeN(EXPR, 3, $1, 
-																	   ast_new_iNode(OP, $2), $3);
+																	   ast_new_iNode(ast, OP, $2), $3);
 															}
 				|	term
 				;
@@ -240,21 +240,21 @@ simpleExpr 		:	simpleExpr addOp term					{ $$ = ast_new_bodyNodeN(EXPR, 3, $1,
 
 
 term			:	term mulOp factor						{ $$ = ast_new_bodyNodeN(EXPR, 3, $1, 
-																	   ast_new_iNode(OP, $2), $3);
+																	   ast_new_iNode(ast, OP, $2), $3);
 															}
 				|	factor
 				;
 
 
 
-factor 			:	Token_Integer 							{ $$ = ast_new_iNode(INT_CONST, $<iValue>1);}
-				| 	Token_Real 								{ $$ = ast_new_fNode(REAL_CONST, $<fValue>1);	}
-				|	Token_String 							{ $$ = ast_new_strNode(STRING_CONST, $<identifier>1);}
-				|	Token_false 							{ $$ = ast_new_iNode(BOOL_CONST, $<iValue>1);}
-				|	Token_true 								{ $$ = ast_new_iNode(BOOL_CONST, $<iValue>1);}
-				|	Token_identifier						{ $$ = ast_new_strNode(IDENTIFIER, $<identifier>1); }
+factor 			:	Token_Integer 							{ $$ = ast_new_iNode(ast, INT_CONST, $<iValue>1);}
+				| 	Token_Real 								{ $$ = ast_new_fNode(ast, REAL_CONST, $<fValue>1);	}
+				|	Token_String 							{ $$ = ast_new_strNode(ast, STRING_CONST, $<identifier>1);}
+				|	Token_false 							{ $$ = ast_new_iNode(ast, BOOL_CONST, $<iValue>1);}
+				|	Token_true 								{ $$ = ast_new_iNode(ast, BOOL_CONST, $<iValue>1);}
+				|	Token_identifier						{ $$ = ast_new_strNode(ast, IDENTIFIER, $<identifier>1); }
 				|	Token_identifier index  				{ $$ = ast_new_bodyNodeN(ARRAY_IDENTIFIER, 2,
-																	   		ast_new_strNode(Token_identifier, $<identifier>1),
+																	   		ast_new_strNode(ast, Token_identifier, $<identifier>1),
 																	   		$2
 																	   	);
 															}

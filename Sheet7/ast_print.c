@@ -301,25 +301,25 @@ void ast_nice_printBracketExprNode(node_ast* const node, const unsigned char ind
 void ast_nice_printIntConstNode(node_ast* const node, const unsigned char indent)
 {
     ast_nice_printNodeType();
-    //printf("%d", node->iValue);
+    printf("%d", node->symbol->symbol.iValue);
 } 
 
 void ast_nice_printRealConstNode(node_ast* const node, const unsigned char indent)
 {
     ast_nice_printNodeType();
-    //printf("%f", node->fValue);
+    printf("%f", node->symbol->symbol.fValue);
 } 
 
 void ast_nice_printBoolConstNode(node_ast* const node, const unsigned char indent)
 {
     ast_nice_printNodeType();
-    //printf("%s", node->iValue == 1 ? "TRUE" : "FALSE");
+    printf("%s", node->symbol->symbol.iValue == 1 ? "TRUE" : "FALSE");
 } 
 
 void ast_nice_printStringConstNode(node_ast* const node, const unsigned char indent)
 {
     ast_nice_printNodeType();
-    //printf("%s", node->identifier);
+    printf("%s", node->symbol->symbol.sValue);
 }
 
 void ast_nice_printIdentListType(node_ast* const node, const unsigned char indent)

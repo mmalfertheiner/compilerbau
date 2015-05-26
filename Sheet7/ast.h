@@ -41,11 +41,11 @@ node_ast* ast_setRoot(ast_t* ast, node_ast *root);
 /* Node creation/manipulation functions */
 node_ast* ast_new_rawNode(node_type type);
 
-node_ast* ast_new_iNode(node_type type, int iValue);
+node_ast* ast_new_iNode(ast_t* ast, node_type type, int iValue);
 
-node_ast* ast_new_fNode(node_type type, float fValue);
+node_ast* ast_new_fNode(ast_t* ast, node_type type, float fValue);
 
-node_ast* ast_new_strNode(node_type type, char* str);
+node_ast* ast_new_strNode(ast_t* ast, node_type type, char* str);
 
 node_ast* ast_new_vBodyNodeN(node_type type, unsigned char n, va_list bodies);
 
