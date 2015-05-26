@@ -13,7 +13,7 @@ extern int yylineno;
 int yyerror (const char *s);
 
 unsigned int errorFound = 0;
-node_ast *ast = NULL;
+ast_t *ast = NULL;
 
 int yydebug=1;
 
@@ -98,9 +98,11 @@ int yydebug=1;
 
 
 start			:	Token_program Token_identifier 
-						Token_semicolon varDec compStmt Token_dot 		{ ast = ast_new_bodyNodeN(PROGRAM, 3, 
+						Token_semicolon varDec compStmt Token_dot 		{ root = ast_new_bodyNodeN(PROGRAM, 3, 
 			 												   				ast_new_strNode(IDENTIFIER, $<identifier>2),
 																	   		$4, $5);
+
+																			ast_setRoot(ast, root);
 																		}
 				;
 
@@ -296,13 +298,14 @@ int yyerror(const char *s) {
 }
 
 int main() {
+	ast = ast_new();
 	yyparse();
 	if (errorFound)
 		printf("\n\nDone - Some errors occurred\n");
 	else
 		printf("\n\nDone - No errors\n");
 
-	ast_nice_print(ast);
+	ast_nice_print(ast->root);
 	printf("\n");
 
 	return 0;

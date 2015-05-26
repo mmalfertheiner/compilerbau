@@ -8,6 +8,7 @@ node_ast* ast_new_rawNode(node_type type)
 	node_ast *node = (node_ast*)malloc(sizeof(node_ast));
 
 	node->type = type;
+	node->symTab = NULL;
 	node->next = NULL;
 	return node;
 }
@@ -67,8 +68,21 @@ node_ast* ast_new_vBodyNodeN(node_type type, unsigned char n, va_list bodies)
 
 node_ast* ast_addNode(node_ast *front, node_ast *newNode)
 {
+	if (!newNode)
+		return front;
 	while (front->next) 
 		front = front->next;
 	front->next = newNode;
 	return newNode;
+}
+
+symtab_entry_t* ast_findSymInScope(node_ast* scope, entry_type_t entryType, data_type_t dataType, void *val)
+{
+	if (!scope)
+		return NULL;
+
+	unsigned int idx = symtab_hashToIdx(symtab_hash(entryType, dataType, val));
+	symtab_entry_t *entry = symtab_findByIdx(scope->symTab, idx, entryType, dataType, val);
+
+	return entry;
 }
