@@ -281,7 +281,7 @@ void ast_nice_printVarNode(node_ast* const node, const unsigned char indent)
 void ast_nice_printTypeNode(node_ast* const node, const unsigned char indent)
 {
     ast_nice_printNodeType();
-    printf("%s", node->identifier);
+    //printf("%s", node->identifier);
 } 
 
 void ast_nice_printExprNode(node_ast* const node, const unsigned char indent)
@@ -301,25 +301,25 @@ void ast_nice_printBracketExprNode(node_ast* const node, const unsigned char ind
 void ast_nice_printIntConstNode(node_ast* const node, const unsigned char indent)
 {
     ast_nice_printNodeType();
-    printf("%d", node->iValue);
+    //printf("%d", node->iValue);
 } 
 
 void ast_nice_printRealConstNode(node_ast* const node, const unsigned char indent)
 {
     ast_nice_printNodeType();
-    printf("%f", node->fValue);
+    //printf("%f", node->fValue);
 } 
 
 void ast_nice_printBoolConstNode(node_ast* const node, const unsigned char indent)
 {
     ast_nice_printNodeType();
-    printf("%s", node->iValue == 1 ? "TRUE" : "FALSE");
+    //printf("%s", node->iValue == 1 ? "TRUE" : "FALSE");
 } 
 
 void ast_nice_printStringConstNode(node_ast* const node, const unsigned char indent)
 {
     ast_nice_printNodeType();
-    printf("%s", node->identifier);
+    //printf("%s", node->identifier);
 }
 
 void ast_nice_printIdentListType(node_ast* const node, const unsigned char indent)
@@ -339,7 +339,7 @@ void ast_nice_printIdentifierList(node_ast* const node, const unsigned char inde
 void ast_nice_printIdentifierNode(node_ast* const node, const unsigned char indent)
 {
     ast_nice_printNodeType();
-    printf("%s", node->identifier);
+    //printf("%s", node->identifier);
 }
 
 void ast_nice_printArrayType(node_ast* const node, const unsigned char indent) {
@@ -355,7 +355,7 @@ void ast_nice_printArrayType(node_ast* const node, const unsigned char indent) {
 void ast_nice_printArrayIdentifierNode(node_ast* const node, const unsigned char indent)
 {
     ast_nice_printNodeType();
-    printf("%s[", node->body->identifier);
+    //printf("%s[", node->body->identifier);
     ast_nice_printNode(node->body->next, 0);
     printf("]");
 }
@@ -363,7 +363,7 @@ void ast_nice_printArrayIdentifierNode(node_ast* const node, const unsigned char
 void ast_nice_printOpNode(node_ast* const node, const unsigned char indent)
 {
     ast_nice_printNodeType();
-    switch (node->iValue) {
+    /**switch (node->iValue) {
         case PLUS:
             printf("+");
             break;
@@ -403,7 +403,7 @@ void ast_nice_printOpNode(node_ast* const node, const unsigned char indent)
         case OR:
             printf("OR");
             break;
-    }
+    }**/
 } 
 
 void ast_nice_print(node_ast* ast)

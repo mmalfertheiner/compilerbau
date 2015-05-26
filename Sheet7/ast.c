@@ -17,7 +17,7 @@ node_ast* ast_new_iNode(node_type type, int iValue)
 {
 	node_ast *node = ast_new_rawNode(type);
 
-	node->iValue = iValue;
+	//node->iValue = iValue;
 	return node;
 }	
 
@@ -25,7 +25,7 @@ node_ast* ast_new_fNode(node_type type, float fValue)
 {
 	node_ast *node = ast_new_rawNode(type);
 
-	node->fValue = fValue;
+	//node->fValue = fValue;
 	return node;
 }
 
@@ -33,7 +33,7 @@ node_ast* ast_new_strNode(node_type type, char* str)
 {
 	node_ast *node = ast_new_rawNode(type);
 
-	node->identifier = str;
+	//node->identifier = str;
 	return node;
 }
 

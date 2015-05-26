@@ -14,6 +14,7 @@ int yyerror (const char *s);
 
 unsigned int errorFound = 0;
 ast_t *ast = NULL;
+node_ast *root = NULL;
 
 int yydebug=1;
 

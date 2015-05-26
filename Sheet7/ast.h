@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
+#include <stdio.h>
+#include "sym_tab.h"
 
 
 typedef enum { 
@@ -14,7 +16,7 @@ typedef enum {
 
 typedef enum { 
 	PLUS, MINUS, MUL, DIV, MOD, LT, LE, GT, GE, EQ, NE, AND, OR
-	} operator;
+	} operator_t;
 
 typedef struct _node {
 	node_type type;
@@ -77,7 +79,7 @@ node_ast* ast_new_symNodeEx(ast_t* ast, node_type nodeType, symtab_entry_t *entr
 	return node;
 }
 
-node_t* ast_new_symNode(ast_t* ast, entry_type_t entryType, data_type_t dataType, void *val, void *val2)
+node_ast* ast_new_symNode(ast_t* ast, entry_type_t entryType, data_type_t dataType, void *val, void *val2)
 {
 	return ast_new_symNodeEx(ast, SYMBOL, symtab_insert(ast->currScope->symTab, entryType, dataType, val, val2));
 }
