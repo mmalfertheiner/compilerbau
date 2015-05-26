@@ -34,24 +34,9 @@ typedef struct _ast {
 	node_ast *currScope;
 } ast_t;
 
-ast_t* ast_new()
-{
-	ast_t *ast = (ast_t*)malloc(sizeof(ast_t));
+ast_t* ast_new();
 
-	if (!ast) {
-		printf("Out of memory!");
-		exit(EXIT_FAILURE);
-	}
-	ast->root = NULL;
-	ast->currScope = NULL;
-	return ast;
-}
-
-node_ast* ast_setRoot(ast_t* ast, node_ast *root)
-{
-	ast->root = root;
-	return root;
-}
+node_ast* ast_setRoot(ast_t* ast, node_ast *root);
 
 /* Node creation/manipulation functions */
 node_ast* ast_new_rawNode(node_type type);
@@ -70,18 +55,8 @@ node_ast* ast_new_bodyNode(node_type type, node_ast *body);
 
 node_ast* ast_addNode(node_ast *front, node_ast *newEnd);
 
-node_ast* ast_new_symNodeEx(ast_t* ast, node_type nodeType, symtab_entry_t *entry)
-{
-	node_ast *node;
+node_ast* ast_new_symNodeEx(ast_t* ast, node_type nodeType, symtab_entry_t *entry);
 
-	node = ast_new_rawNode(nodeType);
-	node->symbol = entry;
-	return node;
-}
-
-node_ast* ast_new_symNode(ast_t* ast, entry_type_t entryType, data_type_t dataType, void *val, void *val2)
-{
-	return ast_new_symNodeEx(ast, SYMBOL, symtab_insert(ast->currScope->symTab, entryType, dataType, val, val2));
-}
+node_ast* ast_new_symNode(ast_t* ast, entry_type_t entryType, data_type_t dataType, void *val, void *val2);
 
 #endif

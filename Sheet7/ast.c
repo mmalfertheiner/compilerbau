@@ -3,6 +3,25 @@
 #include <string.h>
 #include <stdlib.h>
 
+ast_t* ast_new()
+{
+	ast_t *ast = (ast_t*)malloc(sizeof(ast_t));
+
+	if (!ast) {
+		printf("Out of memory!");
+		exit(EXIT_FAILURE);
+	}
+	ast->root = NULL;
+	ast->currScope = NULL;
+	return ast;
+}
+
+node_ast* ast_setRoot(ast_t* ast, node_ast *root)
+{
+	ast->root = root;
+	return root;
+}
+
 node_ast* ast_new_rawNode(node_type type)
 {
 	node_ast *node = (node_ast*)malloc(sizeof(node_ast));
@@ -85,4 +104,18 @@ symtab_entry_t* ast_findSymInScope(node_ast* scope, entry_type_t entryType, data
 	symtab_entry_t *entry = symtab_findByIdx(scope->symTab, idx, entryType, dataType, val);
 
 	return entry;
+}
+
+node_ast* ast_new_symNodeEx(ast_t* ast, node_type nodeType, symtab_entry_t *entry)
+{
+	node_ast *node;
+
+	node = ast_new_rawNode(nodeType);
+	node->symbol = entry;
+	return node;
+}
+
+node_ast* ast_new_symNode(ast_t* ast, entry_type_t entryType, data_type_t dataType, void *val, void *val2)
+{
+	return ast_new_symNodeEx(ast, SYMBOL, symtab_insert(ast->currScope->symTab, entryType, dataType, val, val2));
 }
