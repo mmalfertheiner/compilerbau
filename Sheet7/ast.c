@@ -53,9 +53,28 @@ node_ast* ast_new_fNode(ast_t* ast, node_type type, float fValue)
 node_ast* ast_new_strNode(ast_t* ast, node_type type, char* str)
 {
 	node_ast *node = ast_new_rawNode(type);
-
-	symtab_insert(ast->currScope->symTab, ET_CONST, DT_STRING, str, NULL);
+	switch(type){
+		case STRING_CONST:
+			symtab_insert(ast->currScope->symTab, ET_CONST, DT_STRING, str, NULL);
+			break;
+		default:
+			break;
+	}
 	return node;
+}
+
+node_ast* ast_new_identListType(ast_t* ast, node_type type, node_ast *identifierList, data_type_t listType) {
+
+	if (identifierList) {
+        node_ast *curr = identifierList->body;
+
+        while (curr) {
+        	symtab_insert(ast->currScope->symTab, ET_DECL, listType, curr->symbol->symbol.sValue, NULL);
+            curr = curr->next;
+        }
+    }
+
+	return ast_new_bodyNodeN(type, 2, identifierList, listType);
 }
 
 node_ast* ast_new_bodyNodeN(node_type type, unsigned char n, ...)

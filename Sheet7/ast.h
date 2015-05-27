@@ -47,6 +47,8 @@ node_ast* ast_new_fNode(ast_t* ast, node_type type, float fValue);
 
 node_ast* ast_new_strNode(ast_t* ast, node_type type, char* str);
 
+node_ast* ast_new_identListType(ast_t* ast, node_type type, node_ast *identifierList, data_type_t listType);
+
 node_ast* ast_new_vBodyNodeN(node_type type, unsigned char n, va_list bodies);
 
 node_ast* ast_new_bodyNodeN(node_type type, unsigned char n, ...);

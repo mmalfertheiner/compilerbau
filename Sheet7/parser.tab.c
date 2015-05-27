@@ -1581,7 +1581,7 @@ yyreduce:
 
   case 7:
 #line 120 "parser.y"
-    { (yyval.body) = ast_new_bodyNodeN(IDENT_LIST_TYPE, 2, ast_new_bodyNode(IDENTIFIER_LIST, (yyvsp[(1) - (3)].body)), (yyvsp[(3) - (3)].body)); ;}
+    { (yyval.body) = ast_new_identListType(ast, IDENT_LIST_TYPE, ast_new_bodyNode(IDENTIFIER_LIST, (yyvsp[(1) - (3)].body)), (yyvsp[(3) - (3)].iValue)); ;}
     break;
 
   case 8:
@@ -1598,29 +1598,29 @@ yyreduce:
 
   case 10:
 #line 130 "parser.y"
-    { (yyval.body) = (yyvsp[(1) - (1)].body); ;}
+    { (yyval.iValue) = (yyvsp[(1) - (1)].iValue); ;}
     break;
 
   case 11:
 #line 133 "parser.y"
     {
-																			(yyval.body) = ast_new_bodyNodeN(ARRAY_TYPE, 3, ast_new_iNode(ast, INT_CONST, (yyvsp[(3) - (9)].iValue)), ast_new_iNode(ast, INT_CONST, (yyvsp[(6) - (9)].iValue)), (yyvsp[(9) - (9)].body));
+																			//$$ = ast_new_bodyNodeN(ARRAY_TYPE, 3, ast_new_iNode(ast, INT_CONST, $<iValue>3), ast_new_iNode(ast, INT_CONST, $<iValue>6), $9);
 					 													;}
     break;
 
   case 12:
 #line 140 "parser.y"
-    { (yyval.body) = ast_new_strNode(ast, TYPE, "integer"); ;}
+    { (yyval.iValue) = DT_INT; ;}
     break;
 
   case 13:
 #line 141 "parser.y"
-    { (yyval.body) = ast_new_strNode(ast, TYPE, "real"); ;}
+    { (yyval.iValue) = DT_REAL; ;}
     break;
 
   case 14:
 #line 142 "parser.y"
-    { (yyval.body) = ast_new_strNode(ast, TYPE, "string"); ;}
+    { (yyval.iValue) = DT_STRING; ;}
     break;
 
   case 15:
@@ -1801,7 +1801,7 @@ yyreduce:
   case 49:
 #line 256 "parser.y"
     { (yyval.body) = ast_new_bodyNodeN(ARRAY_IDENTIFIER, 2,
-																	   		ast_new_strNode(ast, Token_identifier, (yyvsp[(1) - (2)].identifier)),
+																	   		ast_new_strNode(ast, IDENTIFIER, (yyvsp[(1) - (2)].identifier)),
 																	   		(yyvsp[(2) - (2)].body)
 																	   	);
 															;}
@@ -2126,7 +2126,6 @@ int main() {
 		printf("\n\nDone - No errors\n");
 
 	ast_printSymTab(ast->currScope->symTab, 0);
-	ast_nice_print(ast->root);
 	printf("\n");
 
 	return 0;

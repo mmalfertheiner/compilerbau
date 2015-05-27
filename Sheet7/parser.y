@@ -85,8 +85,8 @@ int yydebug=1;
 %start		start
 
 /*	Nonterminal types	*/
-%type <iValue> 	relOp addOp mulOp
-%type <body>	assignStmt compStmt elsePart expr exprList factor forStmt identList identListType ifStmt index simpleExpr simpleType start statement stmtList term toPart type varDec varDecList whileStmt
+%type <iValue> 	relOp addOp mulOp type simpleType
+%type <body>	assignStmt compStmt elsePart expr exprList factor forStmt identList identListType ifStmt index simpleExpr start statement stmtList term toPart varDec varDecList whileStmt
 
 
 
@@ -117,7 +117,7 @@ varDecList		:	varDecList identListType Token_semicolon			{ $$ = $1;
 				| 	identListType Token_semicolon						{ $$ = ast_new_bodyNode(VAR, $1);}
 				;
 
-identListType	:	identList Token_colon type							{ $$ = ast_new_bodyNodeN(IDENT_LIST_TYPE, 2, ast_new_bodyNode(IDENTIFIER_LIST, $1), $3); }
+identListType	:	identList Token_colon type							{ $$ = ast_new_identListType(ast, IDENT_LIST_TYPE, ast_new_bodyNode(IDENTIFIER_LIST, $1), $3); }
 				;
 
 
@@ -131,15 +131,15 @@ type 			:	simpleType											{ $$ = $1; }
 				|	Token_array Token_lRectBracket Token_Integer 
 					Token_dot Token_dot Token_Integer 
 					Token_rRectBracket Token_of simpleType				{
-																			$$ = ast_new_bodyNodeN(ARRAY_TYPE, 3, ast_new_iNode(ast, INT_CONST, $<iValue>3), ast_new_iNode(ast, INT_CONST, $<iValue>6), $9);
+																			//$$ = ast_new_bodyNodeN(ARRAY_TYPE, 3, ast_new_iNode(ast, INT_CONST, $<iValue>3), ast_new_iNode(ast, INT_CONST, $<iValue>6), $9);
 					 													}
 				;
 
 
 
-simpleType		:	Token_integer										{ $$ = ast_new_strNode(ast, TYPE, "integer"); }
-				|	Token_real											{ $$ = ast_new_strNode(ast, TYPE, "real"); }
-				|	Token_string										{ $$ = ast_new_strNode(ast, TYPE, "string"); }
+simpleType		:	Token_integer										{ $$ = DT_INT; }
+				|	Token_real											{ $$ = DT_REAL; }
+				|	Token_string										{ $$ = DT_STRING; }
 				;
 
 
@@ -254,7 +254,7 @@ factor 			:	Token_Integer 							{ $$ = ast_new_iNode(ast, INT_CONST, $<iValue>1
 				|	Token_true 								{ $$ = ast_new_iNode(ast, BOOL_CONST, $<iValue>1);}
 				|	Token_identifier						{ $$ = ast_new_strNode(ast, IDENTIFIER, $<identifier>1); }
 				|	Token_identifier index  				{ $$ = ast_new_bodyNodeN(ARRAY_IDENTIFIER, 2,
-																	   		ast_new_strNode(ast, Token_identifier, $<identifier>1),
+																	   		ast_new_strNode(ast, IDENTIFIER, $<identifier>1),
 																	   		$2
 																	   	);
 															}
@@ -307,7 +307,6 @@ int main() {
 		printf("\n\nDone - No errors\n");
 
 	ast_printSymTab(ast->currScope->symTab, 0);
-	ast_nice_print(ast->root);
 	printf("\n");
 
 	return 0;
