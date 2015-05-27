@@ -54,7 +54,7 @@ node_ast* ast_new_strNode(ast_t* ast, node_type type, char* str)
 {
 	node_ast *node = ast_new_rawNode(type);
 
-	symtab_insert(ast->currScope->symTab, ET_CONST, DT_STRING, &str, NULL);
+	symtab_insert(ast->currScope->symTab, ET_CONST, DT_STRING, str, NULL);
 	return node;
 }
 

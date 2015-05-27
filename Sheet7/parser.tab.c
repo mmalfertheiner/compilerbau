@@ -2125,6 +2125,7 @@ int main() {
 	else
 		printf("\n\nDone - No errors\n");
 
+	ast_printSymTab(ast->currScope->symTab, 0);
 	ast_nice_print(ast->root);
 	printf("\n");
 

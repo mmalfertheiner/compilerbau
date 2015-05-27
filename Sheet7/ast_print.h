@@ -9,5 +9,6 @@
 /* Abstract-syntax-tree print-functions */
 void ast_print(node_ast* const ast);
 void ast_nice_print(node_ast* const ast);
+void ast_printSymTab(symtab_tab_t* symTab, unsigned char indent);
 
 #endif

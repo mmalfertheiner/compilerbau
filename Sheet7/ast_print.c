@@ -517,4 +517,106 @@ void ast_nice_printNode(node_ast* node, unsigned char indent)
             printf("%s[Warning {%s}: Unknown node type \"%d\"]", ast_indentToStr(indent), __FUNCTION__,
                 node->type);
     }
+
+
 }
+
+void ast_printEntryType(entry_type_t entryType)
+{
+    switch (entryType) {
+        case ET_CONST:
+            printf("   ET_CONST    |");
+            break;
+        case ET_DECL:
+            printf("    ET_DECL    |");
+            break;
+        case ET_CONST_DECL:
+            printf(" ET_CONST_DECL |");
+            break;
+        default: 
+            printf("    unknown    |");
+    }
+}
+
+void ast_printDataType(data_type_t dataType)
+{
+    switch (dataType) {
+        case DT_BOOL:
+            printf("   DT_BOOL  |");
+            break;
+        case DT_INT:
+            printf("   DT_INT   |");
+            break;
+        case DT_REAL:
+            printf("   DT_REAL  |");           
+            break;
+        case DT_STRING:
+            printf("  DT_STRING |");           
+            break;
+        case DT_UNDEF:
+            printf("  DT_UNDEF  |");        
+            break;
+        case DT_NOTDECL:
+            printf(" DT_NOTDECL |");
+            break;
+        default: 
+            printf("   unknown  |");
+    }
+}
+
+void ast_printSymValue(symtab_entry_t* entry)
+{
+    switch (entry->entryType) {
+        case ET_CONST:
+            switch (entry->dataType) {
+                case DT_BOOL:
+                case DT_INT:
+                    printf("  iValue   | %d", entry->symbol.iValue);
+                    break;
+                case DT_REAL:
+                    printf("  fValue   | %f", entry->symbol.fValue);
+                    break;
+                case DT_STRING:
+                    printf("  sValue   | %s", entry->symbol.sValue);
+                    break;
+                default:
+                    printf("  unknown  | ?");
+            }
+            break;
+        case ET_DECL:
+        case ET_CONST_DECL:
+            if (!symtab_isArray(entry))
+                printf("   decl    | '%s'", entry->symbol.decl->ident);
+            else
+                printf("   decl    | '%s[%d]'", entry->symbol.decl->ident, entry->symbol.decl->size);
+            break;
+        default:
+            printf("  unknown  | ?");
+    }
+}
+
+void ast_printSymTab(symtab_tab_t* symTab, unsigned char indent)
+{
+    unsigned int i;
+    symtab_entry_t* entry;
+
+    if (!symTab) {
+        printf("NULL\n");
+        return;
+    }
+    printf("\n%s   idx |   entryType   |  dataType  | valueType |       value       "
+        "\n%s  ------------------------------------------------------------------",    
+        ast_indentToStr(indent), ast_indentToStr(indent));
+    for (i = 0; i < SYMTAB_MAX_BUCKETS; i++) {
+        entry = symTab[i];
+        while (entry) {
+            printf("\n%s   %3d |", ast_indentToStr(indent), i);
+            ast_printEntryType(entry->entryType);
+            ast_printDataType(entry->dataType);
+            ast_printSymValue(entry);
+            entry = entry->next;
+        }
+    }
+    printf("\n");
+}
+
