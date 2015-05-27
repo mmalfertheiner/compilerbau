@@ -99,10 +99,10 @@ int yydebug=1;
 
 
 start			:	Token_program Token_identifier 
-						Token_semicolon varDec compStmt Token_dot 		{ root = ast_new_bodyNodeN(PROGRAM, 3, 
+						Token_semicolon varDec compStmt Token_dot 		{ 
+																			root = ast_new_bodyNodeN(PROGRAM, 3, 
 			 												   				ast_new_strNode(ast, IDENTIFIER, $<identifier>2),
 																	   		$4, $5);
-
 																			ast_setRoot(ast, root);
 																		}
 				;

@@ -12,7 +12,9 @@ ast_t* ast_new()
 		exit(EXIT_FAILURE);
 	}
 	ast->root = NULL;
-	ast->currScope = NULL;
+	ast->currScope = ast_new_rawNode(SYM_TAB);
+	ast->currScope->symTab = symtab_new();
+
 	return ast;
 }
 
@@ -43,7 +45,7 @@ node_ast* ast_new_iNode(ast_t* ast, node_type type, int iValue)
 node_ast* ast_new_fNode(ast_t* ast, node_type type, float fValue)
 {
 	node_ast *node = ast_new_rawNode(type);
-
+	
 	symtab_insert(ast->currScope->symTab, ET_CONST, DT_REAL, &fValue, NULL);
 	return node;
 }

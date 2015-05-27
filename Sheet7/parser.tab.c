@@ -1549,10 +1549,10 @@ yyreduce:
     {
         case 2:
 #line 102 "parser.y"
-    { root = ast_new_bodyNodeN(PROGRAM, 3, 
+    { 
+																			root = ast_new_bodyNodeN(PROGRAM, 3, 
 			 												   				ast_new_strNode(ast, IDENTIFIER, (yyvsp[(2) - (6)].identifier)),
 																	   		(yyvsp[(4) - (6)].body), (yyvsp[(5) - (6)].body));
-
 																			ast_setRoot(ast, root);
 																		;}
     break;
