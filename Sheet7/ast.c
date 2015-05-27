@@ -30,7 +30,38 @@ node_ast* ast_new_rawNode(node_type type)
 
 	node->type = type;
 	node->symTab = NULL;
+	node->outerScope = NULL;
 	node->next = NULL;
+	return node;
+}
+
+node_ast* ast_getScope(const ast_t* const ast)
+{
+	return ast->currScope;
+}
+
+node_ast* ast_getOuterScope(const ast_t* const ast)
+{
+	return ast->currScope ? ast->currScope->outerScope : NULL;
+}
+
+node_ast* ast_pushScope(ast_t* const ast)
+{
+	node_ast *node = ast_new_rawNode(VAR_LIST);
+
+	node->symTab = symtab_new();
+	node->outerScope = ast->currScope;
+	ast->currScope = node;
+	return node;
+}
+
+node_ast* ast_popScope(ast_t* const ast, node_ast *declList, node_ast *stmt)
+{
+	node_ast *node = ast->currScope;
+
+	node->body = declList;
+	ast_addNode(declList, stmt);
+	ast->currScope = ast->currScope->outerScope;		
 	return node;
 }
 
@@ -54,7 +85,19 @@ node_ast* ast_new_strNode(ast_t* ast, node_type type, char* str)
 {
 	node_ast *node = ast_new_rawNode(type);
 
-	symtab_insert(ast->currScope->symTab, ET_CONST, DT_STRING, str, NULL);
+	
+	switch(type){
+		case STRING_CONST:
+			symtab_insert(ast->currScope->symTab, ET_CONST, DT_STRING, str, NULL);
+			break;
+		case IDENTIFIER:
+			symtab_insert(ast->currScope->symTab, ET_DECL, DT_STRING, str, NULL);
+			break;
+		default:
+			break;
+	}
+	
+	
 	return node;
 }
 
@@ -113,6 +156,7 @@ node_ast* ast_new_symNodeEx(ast_t* ast, node_type nodeType, symtab_entry_t *entr
 	node_ast *node;
 
 	node = ast_new_rawNode(nodeType);
+	node->outerScope = ast->currScope->outerScope;
 	node->symbol = entry;
 	return node;
 }

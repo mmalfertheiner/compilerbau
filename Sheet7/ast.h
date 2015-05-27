@@ -14,13 +14,20 @@ typedef enum {
 	IDENTIFIER, OP, VAR_LIST, IDENTIFIER_LIST, IDENT_LIST_TYPE, STATEMENT_LIST, EXPR_LIST, BRACKET_EXPR, SYMBOL, SYM_TAB
 	} node_type;
 
+static char *STRING_NODE[]={ 
+	"PROGRAM", "ASSIGN", "READ", "WRITE", "IF", "WHILE", "FOR", "COMP_STMT", "STATEMENT", "CONST", "VAR", "TYPE",
+	"EXPR", "INT_CONST", "REAL_CONST", "FACTOR", "BOOL_CONST", "STRING_CONST", "ARRAY_IDENTIFIER", "ARRAY_TYPE",
+	"IDENTIFIER", "OP", "VAR_LIST", "IDENTIFIER_LIST", "IDENT_LIST_TYPE", "STATEMENT_LIST", "EXPR_LIST", "BRACKET_EXPR", "SYMBOL", "SYM_TAB"
+	};
+
 typedef enum { 
 	PLUS, MINUS, MUL, DIV, MOD, LT, LE, GT, GE, EQ, NE, AND, OR
 	} operator_t;
 
 typedef struct _node {
 	node_type type;
-	symtab_tab_t *symTab;			/* symbol table for let statements */
+	symtab_tab_t *symTab;
+	struct _node *outerScope;			
 	union {
 		operator_t op;
 		symtab_entry_t *symbol;
@@ -58,5 +65,13 @@ node_ast* ast_addNode(node_ast *front, node_ast *newEnd);
 node_ast* ast_new_symNodeEx(ast_t* ast, node_type nodeType, symtab_entry_t *entry);
 
 node_ast* ast_new_symNode(ast_t* ast, entry_type_t entryType, data_type_t dataType, void *val, void *val2);
+
+node_ast* ast_getScope(const ast_t* const ast);
+
+node_ast* ast_getOuterScope(const ast_t* const ast);
+
+node_ast* ast_pushScope(ast_t* const ast);
+
+node_ast* ast_popScope(ast_t* const ast, node_ast *declList, node_ast *stmt);
 
 #endif

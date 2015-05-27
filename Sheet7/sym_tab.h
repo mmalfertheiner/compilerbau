@@ -19,9 +19,17 @@ typedef enum {
 	ET_CONST, ET_DECL, ET_CONST_DECL
 } entry_type_t;
 
+static char *ENTRY_TYPE[]={ 
+	"ET_CONST", "ET_DECL", "ET_CONST_DECL"
+	};
+
 typedef enum { 
 	DT_BOOL = 0, DT_INT, DT_REAL, DT_STRING, DT_UNDEF, DT_NOTDECL
 } data_type_t;
+
+static char *DATA_TYPE[]={ 
+	"DT_BOOL", "DT_INT", "DT_REAL", "DT_STRING", "DT_UNDEF", "DT_NOTDECL"
+	};
 
 typedef struct _decl {
 	char *ident;

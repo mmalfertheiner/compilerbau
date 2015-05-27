@@ -107,7 +107,9 @@ start			:	Token_program Token_identifier
 																		}
 				;
 
-varDec 			:	Token_var varDecList								{ $$ = ast_new_bodyNode(VAR_LIST, $2); }
+varDec 			:	Token_var varDecList								{ 	ast_pushScope(ast);
+																			$$ = ast_new_bodyNode(VAR_LIST, $2); 
+																		}
 				|	/* Epsilon */										{ $$ = NULL; }
 				;
 
@@ -254,7 +256,7 @@ factor 			:	Token_Integer 							{ $$ = ast_new_iNode(ast, INT_CONST, $<iValue>1
 				|	Token_true 								{ $$ = ast_new_iNode(ast, BOOL_CONST, $<iValue>1);}
 				|	Token_identifier						{ $$ = ast_new_strNode(ast, IDENTIFIER, $<identifier>1); }
 				|	Token_identifier index  				{ $$ = ast_new_bodyNodeN(ARRAY_IDENTIFIER, 2,
-																	   		ast_new_strNode(ast, Token_identifier, $<identifier>1),
+																	   		ast_new_strNode(ast, IDENTIFIER, $<identifier>1),
 																	   		$2
 																	   	);
 															}
@@ -307,7 +309,7 @@ int main() {
 		printf("\n\nDone - No errors\n");
 
 	ast_printSymTab(ast->currScope->symTab, 0);
-	ast_nice_print(ast->root);
+	ast_print(ast);
 	printf("\n");
 
 	return 0;
